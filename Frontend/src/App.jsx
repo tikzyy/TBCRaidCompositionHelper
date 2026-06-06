@@ -17,6 +17,40 @@ const KT_LABELS = ['A', 'B', 'C', 'D', 'E']
 const TANK_KEYS   = new Set(['Warrior/Protection', 'Paladin/Protection', 'Druid/Feral (Bear)'])
 const HEALER_KEYS = new Set(['Paladin/Holy', 'Priest/Discipline', 'Priest/Holy', 'Shaman/Restoration', 'Druid/Restoration'])
 
+// Relative likelihood weights for fill sample. Missing entries default to 1.
+const SPEC_WEIGHTS = {
+  // Tanks
+  'Warrior/Protection':   10,
+  'Paladin/Protection':   10,
+  'Druid/Feral (Bear)':   10,
+  // Healers
+  'Paladin/Holy':         10,
+  'Priest/Holy':          10,
+  'Priest/Discipline':    6,
+  'Shaman/Restoration':   10,
+  'Druid/Restoration':    8,
+  // Melee DPS
+  'Warrior/Arms':         3,
+  'Warrior/Fury':         10,
+  'Paladin/Retribution':  10,
+  'Rogue/Any':            10,
+  'Shaman/Enhancement':   8,
+  'Druid/Feral (Cat)':    6,
+  // Ranged / Caster DPS
+  'Hunter/Beast Mastery': 10,
+  'Hunter/Marksmanship':  1,
+  'Hunter/Survival':      2,
+  'Priest/Shadow':        6,
+  'Shaman/Elemental':     8,
+  'Mage/Arcane':          10,
+  'Mage/Fire':            3,
+  'Mage/Frost':           3,
+  'Warlock/Affliction':   2,
+  'Warlock/Demonology':   1,
+  'Warlock/Destruction':  10,
+  'Druid/Balance':        6,
+}
+
 const ROLE_ICONS = {
   Tank:   '/icons/tank.jpg',
   Healer: '/icons/healer.jpg',
@@ -221,6 +255,29 @@ export default function App() {
     setError(null)
   }
 
+  function weightedPick(specs) {
+    const weights = specs.map(s => SPEC_WEIGHTS[`${s.class_name}/${s.spec}`] ?? 1)
+    const total = weights.reduce((a, b) => a + b, 0)
+    let r = Math.random() * total
+    for (let i = 0; i < specs.length; i++) {
+      r -= weights[i]
+      if (r <= 0) return specs[i]
+    }
+    return specs[specs.length - 1]
+  }
+
+  // Weighted pick without replacement — used for tanks/healers where we want distinct specs.
+  function weightedPickN(specs, n) {
+    const result = []
+    let remaining = [...specs]
+    for (let i = 0; i < n && remaining.length > 0; i++) {
+      const picked = weightedPick(remaining)
+      result.push(picked)
+      remaining = remaining.filter(s => s !== picked)
+    }
+    return result
+  }
+
   function fillRoster() {
     const allSpecs = meta.classes.flatMap(c =>
       c.specs.map(s => ({ class_name: c.class_name, spec: s.spec }))
@@ -229,20 +286,15 @@ export default function App() {
     const tanks   = allSpecs.filter(s => TANK_KEYS.has(key(s)))
     const healers  = allSpecs.filter(s => HEALER_KEYS.has(key(s)))
 
-    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5)
-
     const healerCount = raidSize === 10 ? 2 : 5
     const pool = [
-      ...shuffle(tanks).slice(0, 2),
-      ...shuffle(healers).slice(0, healerCount),
+      ...weightedPickN(tanks, 2),
+      ...weightedPickN(healers, healerCount),
     ]
 
     const dpsSpecs = allSpecs.filter(s => !TANK_KEYS.has(key(s)) && !HEALER_KEYS.has(key(s)))
-    const dpsShuffled = shuffle(dpsSpecs)
-    let i = 0
     while (pool.length < raidSize) {
-      pool.push(dpsShuffled[i % dpsShuffled.length])
-      i++
+      pool.push(weightedPick(dpsSpecs))
     }
 
     const labelCounts = {}
