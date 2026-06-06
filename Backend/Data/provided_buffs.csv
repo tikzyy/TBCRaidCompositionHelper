@@ -1,25 +1,27 @@
-class,spec,ability,category,scope,exclusive_group,weight,notes
-Shaman,Any,Windfury Totem,MeleeSwing,party,air,5,Extra melee swings; melee-group cornerstone; competes for air slot
-Shaman,Any,Wrath of Air Totem,Caster,party,air,4,Spell power; competes for air slot
-Shaman,Any,Grace of Air Totem,"Melee,Ranged",party,air,2,Agility; competes for air slot
-Shaman,Elemental,Totem of Wrath,Caster,party,fire,5,Spell hit & crit; talent; competes for fire slot
-Shaman,Restoration,Mana Tide Totem,Mana,party,water,4,Cooldown; large party mana restore; talent; temporarily overrides water totem
-Paladin,Any,Devotion Aura,Defensive,party,aura,2,Armor; only one aura active at a time
-Paladin,Any,Retribution Aura,Melee,party,aura,1,Holy damage to attackers; aura slot
-Paladin,Any,Concentration Aura,Caster,party,aura,2,Reduces casting pushback; aura slot
-Paladin,Any,Greater Blessing of Might,"Melee,Ranged",raid,blessing,3,Per-class raid-wide AP; not group-positional
-Paladin,Any,Greater Blessing of Wisdom,Mana,raid,blessing,3,Per-class raid-wide mp5
-Paladin,Any,Greater Blessing of Kings,Universal,raid,blessing,4,Per-class raid-wide +10% stats; talent
-Paladin,Any,Greater Blessing of Salvation,Defensive,raid,blessing,2,Per-class raid-wide threat reduction
-Hunter,Marksmanship,Trueshot Aura,"Melee,Ranged",party,,3,AP buff; party-wide
-Hunter,Beast Mastery,Ferocious Inspiration,Universal,party,,3,+3% party damage when pet crits; talent
-Warrior,Any,Battle Shout,"Melee,Ranged",party,shout,3,AP; party-wide
-Warrior,Any,Commanding Shout,Defensive,party,shout,2,Max health; party-wide
-Priest,Any,Prayer of Fortitude,Universal,raid,,3,Stamina; raid-wide
-Priest,Discipline,Prayer of Spirit,Mana,raid,,2,Spirit; talent; raid-wide
-Priest,Shadow,Vampiric Touch,Mana,party,,4,Returns mana to party from shadow damage; caster-group cornerstone
-Priest,Shadow,Vampiric Embrace,Defensive,party,,2,Party healing from shadow priest's damage
-Mage,Any,Arcane Brilliance,Mana,raid,,3,Intellect (mana pool + spell crit); raid-wide
-Druid,Feral,Leader of the Pack,"Melee,Ranged",party,,4,5% party crit; matches Feral (Cat) and Feral (Bear)
-Druid,Any,Mark of the Wild (Improved),Universal,raid,,3,Stats & resistances; cast on all (raid-wide)
-Druid,Balance,Moonkin Aura,Caster,party,,3,5% spell crit; mana return on hit (scaling on ap)
+class,spec,ability,category,scope,exclusive_group,weight,stack_decay,notes
+Shaman,Any,Windfury Totem,MeleeSwing,party,air,5,,Extra melee swings; melee-group cornerstone; competes for air slot
+Shaman,Any,Wrath of Air Totem,Caster,party,air,4,,Spell power; competes for air slot
+Shaman,Any,Grace of Air Totem,"Melee,Ranged",party,air,4,,Agility; competes for air slot
+Shaman,Enhancement,Grace of Air Totem,"Melee,Ranged",party,air_twist,4,,Twisted with Windfury; Enhancement only
+Shaman,Enhancement,Wrath of Air Totem,Caster,party,air_twist,4,,Twisted with Windfury; Enhancement only; wins if casters outnumber melee
+Shaman,Elemental,Totem of Wrath,Caster,party,fire,5,0.66,Spell hit & crit; stacks across multiple Elemental Shamans at 50% decay
+Shaman,Restoration,Mana Tide Totem,Mana,party,water,2,,Cooldown; large party mana restore; talent; temporarily overrides water totem
+Paladin,Any,Devotion Aura,Defensive,party,aura,0,,Armor; only one aura active at a time
+Paladin,Any,Retribution Aura,Melee,party,aura,0,,Holy damage to attackers; aura slot
+Paladin,Any,Concentration Aura,Caster,party,aura,0,,Reduces casting pushback; aura slot
+Paladin,Any,Greater Blessing of Might,"Melee,Ranged",raid,blessing,0,,Per-class raid-wide AP; not group-positional
+Paladin,Any,Greater Blessing of Wisdom,Mana,raid,blessing,0,,Per-class raid-wide mp5
+Paladin,Any,Greater Blessing of Kings,Universal,raid,blessing,0,,Per-class raid-wide +10% stats; talent
+Paladin,Any,Greater Blessing of Salvation,Defensive,raid,blessing,0,,Per-class raid-wide threat reduction
+Hunter,Marksmanship,Trueshot Aura,"Melee,Ranged",party,,3,0,AP buff; party-wide
+Hunter,Beast Mastery,Ferocious Inspiration,Universal,party,,4,0.5,+3% party damage when pet crits; talent
+Warrior,Any,Battle Shout,"Melee,Ranged",party,shout,3,0,AP; party-wide
+Warrior,Any,Commanding Shout,Defensive,party,shout,1,,Max health; party-wide
+Priest,Any,Prayer of Fortitude,Universal,raid,,5,,Stamina; raid-wide
+Priest,Discipline,Prayer of Spirit,Mana,raid,,5,,Spirit; talent; raid-wide
+Priest,Shadow,Vampiric Touch,Mana,party,,4,,Returns mana to party from shadow damage; caster-group cornerstone
+Priest,Shadow,Vampiric Embrace,Defensive,party,,1,,Party healing from shadow priest's damage
+Mage,Any,Arcane Brilliance,Mana,raid,,5,,Intellect (mana pool + spell crit); raid-wide
+Druid,Feral,Leader of the Pack,"Melee,Ranged",party,,4,0,5% party crit; matches Feral (Cat) and Feral (Bear)
+Druid,Any,Mark of the Wild (Improved),Universal,raid,,5,,Stats & resistances; cast on all (raid-wide)
+Druid,Balance,Moonkin Aura,Caster,party,,5,0,5% spell crit; mana return on hit (scaling on ap)

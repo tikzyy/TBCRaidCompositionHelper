@@ -1,19 +1,19 @@
 class,spec,role,benefits_from,notes
 Warrior,Arms,MeleeDPS,"Melee,MeleeSwing,Universal",
 Warrior,Fury,MeleeDPS,"Melee,MeleeSwing,Universal",
-Warrior,Protection,Tank,"Defensive,MeleeSwing:0.5,Melee:0.6,Universal",
-Paladin,Holy,Healer,"Caster:0.6,Mana:0.6,Universal",Spell power helps healing but mana is primary concern
-Paladin,Protection,Tank,"Defensive,MeleeSwing:0.5,Mana:0.8,Universal,Melee:0.6,caster:0.6",Mana for threat generation; AP less valuable
-Paladin,Retribution,MeleeDPS,"Melee,MeleeSwing,Mana:0.5,Universal,caster:0.2",
+Warrior,Protection,Tank,"Defensive,MeleeSwing:0.6,Melee:0.6,Universal",
+Paladin,Holy,Healer,"Caster:0.6,Mana:0.8,Universal",Spell power helps healing but mana is primary concern
+Paladin,Protection,Tank,"Defensive,MeleeSwing:0.6,Mana:0.8,Universal,Melee:0.6,Caster:0.6",Mana for threat generation; AP less valuable
+Paladin,Retribution,MeleeDPS,"Melee,MeleeSwing,Mana:0.5,Universal,Caster:0.1",
 Hunter,Beast Mastery,RangedDPS,"Ranged,Mana:0.6,Universal",
 Hunter,Marksmanship,RangedDPS,"Ranged,Mana:0.6,Universal",
-Hunter,Survival,RangedDPS,"Ranged,Mana:0.6,Universal",
+Hunter,Survival,RangedDPS,"Ranged:0.75,Melee:0.25,MeleeSwing:0.25,Mana:0.6,Universal",
 Rogue,Any,MeleeDPS,"Melee,MeleeSwing,Universal",No mana resource
-Priest,Discipline,Healer,"Caster:0.6,Mana,Universal",
-Priest,Holy,Healer,"Caster:0.6,Mana,Universal",
+Priest,Discipline,Healer,"Caster:0.6,Mana:0.8,Universal",
+Priest,Holy,Healer,"Caster:0.6,Mana:0.8,Universal",
 Priest,Shadow,CasterDPS,"Caster,Mana:0.8,Universal",
 Shaman,Elemental,CasterDPS,"Caster,Mana:0.8,Universal",
-Shaman,Enhancement,MeleeDPS,"Melee,MeleeSwing,Mana:0.8,Universal,caster:0.4",
+Shaman,Enhancement,MeleeDPS,"Melee,MeleeSwing,Mana:0.8,Universal,Caster:0.4",
 Shaman,Restoration,Healer,"Caster:0.6,Mana:0.8,Universal",Placed in melee groups for Windfury provision
 Mage,Arcane,CasterDPS,"Caster,Mana:1.2,Universal",
 Mage,Fire,CasterDPS,"Caster,Mana,Universal",
@@ -22,6 +22,6 @@ Warlock,Affliction,CasterDPS,"Caster,Mana,Universal",
 Warlock,Demonology,CasterDPS,"Caster,Mana,Universal",
 Warlock,Destruction,CasterDPS,"Caster,Mana,Universal",
 Druid,Balance,CasterDPS,"Caster,Mana,Universal",
-Druid,Feral (Cat),MeleeDPS,"Melee,Universal",
+Druid,Feral (Cat),MeleeDPS,"Melee,Universal,Mana:0.4",
 Druid,Feral (Bear),Tank,"Defensive,Melee:0.6,Universal",Not a meaningful auto-attacker; no Windfury benefit
 Druid,Restoration,Healer,"Caster:0.6,Mana:0.8,Universal",

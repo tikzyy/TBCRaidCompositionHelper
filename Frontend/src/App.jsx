@@ -37,6 +37,8 @@ const ROLE_MAP = {
   'Druid/Feral (Bear)': 'Tank',   'Druid/Restoration': 'Healer',
 }
 
+const ROLE_ORDER = { Tank: 0, Healer: 1, Ranged: 2, Melee: 3 }
+
 const CLASS_COLORS = {
   Warrior: '#C69B3A',
   Paladin: '#F48CBA',
@@ -135,9 +137,15 @@ function DroppableGroupCard({ index, group, isOver }) {
         <span className="group-score">{group.score} pts</span>
       </div>
       <ul className="group-players">
-        {group.players.map(p => (
-          <DraggablePlayer key={p.id} player={p} groupIdx={index - 1} />
-        ))}
+        {[...group.players]
+          .sort((a, b) => {
+            const ra = ROLE_ORDER[ROLE_MAP[`${a.class_name}/${a.spec}`] ?? 'Ranged'] ?? 2
+            const rb = ROLE_ORDER[ROLE_MAP[`${b.class_name}/${b.spec}`] ?? 'Ranged'] ?? 2
+            return ra !== rb ? ra - rb : a.class_name.localeCompare(b.class_name)
+          })
+          .map(p => (
+            <DraggablePlayer key={p.id} player={p} groupIdx={index - 1} />
+          ))}
         {group.players.length === 0 && (
           <li className="group-player dim" style={{ borderLeftColor: 'transparent' }}>
             Empty

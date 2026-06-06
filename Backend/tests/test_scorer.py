@@ -26,16 +26,16 @@ def p(id_, class_, spec):
 def test_air_slot_picks_windfury_for_melee_group():
     """
     Group: 1 Enhancement Shaman + 3 Fury Warriors.
-    Enhancement Shaman has air slot: Windfury (cat=Melee, w=5),
-    Wrath of Air (cat=Caster, w=4), Grace of Air (cat=Melee+Ranged, w=2).
-    All four players benefit from Melee, none from Caster.
-      Windfury realised   = 5 * 4 = 20   ← best
-      Grace of Air        = 2 * 4 =  8
-      Wrath of Air        = 4 * 0 =  0
-    Plus: Warriors provide Battle Shout (cat=Melee+Ranged, w=3, non-exclusive).
-      Battle Shout realised = 3 * 4 = 12  (all four benefit from Melee)
-      — two warriors both provide it, but it's deduplicated → counted once.
-    Total = 20 + 12 = 32.
+    Enhancement Shaman has air slot (all Shamans): Windfury (MeleeSwing w=5),
+    Wrath of Air (Caster w=4), Grace of Air (Melee+Ranged w=4).
+    Enhancement also has air_twist slot: Grace (Melee+Ranged w=4) or Wrath (Caster w=4).
+    All four benefit from Melee/MeleeSwing; none from Caster.
+      air slot   -> Windfury  5*4 = 20  (best)
+      air_twist  -> Grace     4*4 = 16  (best secondary for this melee group)
+      Wrath of Air = 4*0 = 0 in both slots
+    Warriors provide Battle Shout (Melee+Ranged w=3), deduplicated to one instance.
+      Battle Shout = 3*4 = 12
+    Total = 20 + 16 + 12 = 48.
     """
     group = [
         p("s1", "Shaman", "Enhancement"),
@@ -43,7 +43,7 @@ def test_air_slot_picks_windfury_for_melee_group():
         p("w2", "Warrior", "Fury"),
         p("w3", "Warrior", "Fury"),
     ]
-    assert score_group(group, SPECS, BUFFS) == 32.0
+    assert score_group(group, SPECS, BUFFS) == 48.0
 
 
 # ---------------------------------------------------------------------------

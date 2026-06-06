@@ -25,30 +25,36 @@ def get_party_buffs(player: Player, buffs: list[Buff]) -> list[Buff]:
     return result
 
 
-def _realised(buff: Buff, group_benefits: list[dict[str, float]]) -> float:
-    """buff.weight × sum of per-player benefit weights.
+def _realised(buff: Buff, group_benefits: list[dict[str, float]], weight: float | None = None) -> float:
+    """(weight or buff.weight) × sum of per-player benefit weights.
 
     For each player, take the maximum weight across any of the buff's categories
     that the player benefits from (handles multi-category buffs like Melee+Ranged).
     Players with no matching category contribute 0.
     """
+    w = weight if weight is not None else float(buff.weight)
     total = sum(
         max((pb[cat] for cat in buff.category if cat in pb), default=0.0)
         for pb in group_benefits
     )
-    return buff.weight * total
+    return w * total
 
 
 def _chosen_buffs(
     group: list[Player], specs_lookup: dict, buffs: list[Buff]
-) -> tuple[list[Buff], list[dict[str, float]]]:
+) -> tuple[list[tuple[Buff, float]], list[dict[str, float]]]:
     """
     Core selection logic shared by score_group and get_active_buffs.
-    Returns (chosen_buffs, group_benefits) after exclusive-slot selection and deduplication.
+    Returns ([(buff, effective_weight), ...], group_benefits) after exclusive-slot
+    selection and deduplication/stack-decay handling.
+
+    Buffs with stack_decay == 0.0 are deduplicated (only first provider counts).
+    Buffs with stack_decay > 0.0 allow additional providers at decaying weight:
+      2nd copy: weight * decay, 3rd copy: weight * decay^2, etc.
     """
     group_benefits = [get_benefits(p, specs_lookup) for p in group]
-    seen: set[str] = set()
-    chosen: list[Buff] = []
+    ability_count: dict[str, int] = {}
+    chosen: list[tuple[Buff, float]] = []
 
     for player in group:
         party_buffs = get_party_buffs(player, buffs)
@@ -67,9 +73,15 @@ def _chosen_buffs(
             selected.append(best)
 
         for buff in selected:
-            if buff.ability not in seen:
-                seen.add(buff.ability)
-                chosen.append(buff)
+            count = ability_count.get(buff.ability, 0)
+            if count == 0:
+                ability_count[buff.ability] = 1
+                chosen.append((buff, float(buff.weight)))
+            elif buff.stack_decay > 0.0:
+                effective_weight = buff.weight * (buff.stack_decay ** count)
+                ability_count[buff.ability] = count + 1
+                chosen.append((buff, effective_weight))
+            # else: stack_decay == 0.0, skip duplicate
 
     return chosen, group_benefits
 
@@ -77,13 +89,13 @@ def _chosen_buffs(
 def score_group(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> float:
     """Total party-buff synergy score for one group."""
     chosen, group_benefits = _chosen_buffs(group, specs_lookup, buffs)
-    return sum(_realised(b, group_benefits) for b in chosen)
+    return sum(_realised(b, group_benefits, w) for b, w in chosen)
 
 
 def get_active_buffs(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> list[str]:
     """Names of party buffs active in this group after exclusive selection and deduplication."""
     chosen, _ = _chosen_buffs(group, specs_lookup, buffs)
-    return [b.ability for b in chosen]
+    return [b.ability for b, _ in chosen]
 
 
 def score_partition(groups: list[list[Player]], specs_lookup: dict, buffs: list[Buff]) -> float:

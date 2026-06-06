@@ -22,6 +22,7 @@ class Buff:
     scope: str
     exclusive_group: str  # "" when not exclusive
     weight: int
+    stack_decay: float  # 0.0 = deduplicated (no stacking); >0 = each extra copy scores at this fraction
 
 
 def load_specs() -> dict[tuple[str, str], dict[str, float]]:
@@ -38,9 +39,9 @@ def load_specs() -> dict[tuple[str, str], dict[str, float]]:
             entry = entry.strip()
             if ":" in entry:
                 cat, w = entry.rsplit(":", 1)
-                cats[cat.strip()] = float(w)
+                cats[cat.strip().lower()] = float(w)
             else:
-                cats[entry] = 1.0
+                cats[entry.lower()] = 1.0
         result[(row["class"].strip(), row["spec"].strip())] = cats
     return result
 
@@ -63,8 +64,9 @@ def load_buffs() -> list[Buff]:
     df = pd.read_csv(DATA_DIR / "provided_buffs.csv")
     buffs = []
     for _, row in df.iterrows():
-        cats = frozenset(c.strip() for c in str(row["category"]).split(","))
+        cats = frozenset(c.strip().lower() for c in str(row["category"]).split(","))
         eg = row["exclusive_group"]
+        sd = row["stack_decay"]
         buffs.append(Buff(
             class_name=row["class"].strip(),
             spec=row["spec"].strip(),
@@ -73,5 +75,6 @@ def load_buffs() -> list[Buff]:
             scope=row["scope"].strip(),
             exclusive_group=eg.strip() if pd.notna(eg) and str(eg).strip() else "",
             weight=int(row["weight"]),
+            stack_decay=float(sd) if pd.notna(sd) and str(sd).strip() else 0.0,
         ))
     return buffs
