@@ -31,17 +31,20 @@ def _realised(buff: Buff, group_benefits: list[frozenset]) -> float:
     return buff.weight * benefiting
 
 
-def score_group(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> float:
-    """Total party-buff synergy score for one group."""
+def _chosen_buffs(
+    group: list[Player], specs_lookup: dict, buffs: list[Buff]
+) -> tuple[list[Buff], list[frozenset]]:
+    """
+    Core selection logic shared by score_group and get_active_buffs.
+    Returns (chosen_buffs, group_benefits) after exclusive-slot selection and deduplication.
+    """
     group_benefits = [get_benefits(p, specs_lookup) for p in group]
-
-    seen_abilities: set[str] = set()
-    total = 0.0
+    seen: set[str] = set()
+    chosen: list[Buff] = []
 
     for player in group:
         party_buffs = get_party_buffs(player, buffs)
 
-        # Separate exclusive-slot buffs from always-active ones
         exclusive: dict[str, list[Buff]] = {}
         non_exclusive: list[Buff] = []
         for buff in party_buffs:
@@ -50,19 +53,29 @@ def score_group(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> f
             else:
                 non_exclusive.append(buff)
 
-        # For each exclusive slot, keep only the buff that adds the most value
-        chosen = list(non_exclusive)
+        selected = list(non_exclusive)
         for slot_buffs in exclusive.values():
             best = max(slot_buffs, key=lambda b: _realised(b, group_benefits))
-            chosen.append(best)
+            selected.append(best)
 
-        # Accumulate score; same ability from two providers only counts once
-        for buff in chosen:
-            if buff.ability not in seen_abilities:
-                seen_abilities.add(buff.ability)
-                total += _realised(buff, group_benefits)
+        for buff in selected:
+            if buff.ability not in seen:
+                seen.add(buff.ability)
+                chosen.append(buff)
 
-    return total
+    return chosen, group_benefits
+
+
+def score_group(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> float:
+    """Total party-buff synergy score for one group."""
+    chosen, group_benefits = _chosen_buffs(group, specs_lookup, buffs)
+    return sum(_realised(b, group_benefits) for b in chosen)
+
+
+def get_active_buffs(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> list[str]:
+    """Names of party buffs active in this group after exclusive selection and deduplication."""
+    chosen, _ = _chosen_buffs(group, specs_lookup, buffs)
+    return [b.ability for b in chosen]
 
 
 def score_partition(groups: list[list[Player]], specs_lookup: dict, buffs: list[Buff]) -> float:

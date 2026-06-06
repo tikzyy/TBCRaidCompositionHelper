@@ -34,6 +34,19 @@ def load_specs() -> dict[tuple[str, str], frozenset]:
     return result
 
 
+def load_spec_list() -> list[dict]:
+    """Return [{class_name, spec, role}, ...] ordered as they appear in the CSV."""
+    df = pd.read_csv(DATA_DIR / "specs_benefits.csv")
+    result = []
+    for _, row in df.iterrows():
+        result.append({
+            "class_name": row["class"].strip(),
+            "spec": row["spec"].strip(),
+            "role": row["role"].strip(),
+        })
+    return result
+
+
 def load_buffs() -> list[Buff]:
     """Return all Buff objects from provided_buffs.csv."""
     df = pd.read_csv(DATA_DIR / "provided_buffs.csv")
