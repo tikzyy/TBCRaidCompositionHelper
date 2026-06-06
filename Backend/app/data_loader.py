@@ -24,12 +24,23 @@ class Buff:
     weight: int
 
 
-def load_specs() -> dict[tuple[str, str], frozenset]:
-    """Return {(class, spec): frozenset(benefit_categories)} from specs_benefits.csv."""
+def load_specs() -> dict[tuple[str, str], dict[str, float]]:
+    """Return {(class, spec): {category: weight}} from specs_benefits.csv.
+
+    benefits_from entries may be plain ('Melee') defaulting to weight 1.0,
+    or weighted ('Melee:0.5'). Both forms may appear in the same row.
+    """
     df = pd.read_csv(DATA_DIR / "specs_benefits.csv")
     result = {}
     for _, row in df.iterrows():
-        cats = frozenset(c.strip() for c in str(row["benefits_from"]).split(","))
+        cats: dict[str, float] = {}
+        for entry in str(row["benefits_from"]).split(","):
+            entry = entry.strip()
+            if ":" in entry:
+                cat, w = entry.rsplit(":", 1)
+                cats[cat.strip()] = float(w)
+            else:
+                cats[entry] = 1.0
         result[(row["class"].strip(), row["spec"].strip())] = cats
     return result
 

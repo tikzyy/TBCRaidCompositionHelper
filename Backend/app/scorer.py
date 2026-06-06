@@ -1,13 +1,13 @@
 from .data_loader import Buff, Player
 
 
-def get_benefits(player: Player, specs_lookup: dict) -> frozenset:
-    """Return the benefit categories for a player, falling back to the 'Any' row."""
+def get_benefits(player: Player, specs_lookup: dict) -> dict[str, float]:
+    """Return {category: weight} for a player, falling back to the 'Any' row."""
     key = (player.class_name, player.spec)
     if key in specs_lookup:
         return specs_lookup[key]
     any_key = (player.class_name, "Any")
-    return specs_lookup.get(any_key, frozenset())
+    return specs_lookup.get(any_key, {})
 
 
 def get_party_buffs(player: Player, buffs: list[Buff]) -> list[Buff]:
@@ -25,15 +25,23 @@ def get_party_buffs(player: Player, buffs: list[Buff]) -> list[Buff]:
     return result
 
 
-def _realised(buff: Buff, group_benefits: list[frozenset]) -> float:
-    """buff.weight × number of group members whose benefit categories overlap the buff."""
-    benefiting = sum(1 for b in group_benefits if buff.category & b)
-    return buff.weight * benefiting
+def _realised(buff: Buff, group_benefits: list[dict[str, float]]) -> float:
+    """buff.weight × sum of per-player benefit weights.
+
+    For each player, take the maximum weight across any of the buff's categories
+    that the player benefits from (handles multi-category buffs like Melee+Ranged).
+    Players with no matching category contribute 0.
+    """
+    total = sum(
+        max((pb[cat] for cat in buff.category if cat in pb), default=0.0)
+        for pb in group_benefits
+    )
+    return buff.weight * total
 
 
 def _chosen_buffs(
     group: list[Player], specs_lookup: dict, buffs: list[Buff]
-) -> tuple[list[Buff], list[frozenset]]:
+) -> tuple[list[Buff], list[dict[str, float]]]:
     """
     Core selection logic shared by score_group and get_active_buffs.
     Returns (chosen_buffs, group_benefits) after exclusive-slot selection and deduplication.

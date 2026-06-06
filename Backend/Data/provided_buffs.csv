@@ -1,5 +1,5 @@
 class,spec,ability,category,scope,exclusive_group,weight,notes
-Shaman,Any,Windfury Totem,Melee,party,air,5,Extra melee swings; melee-group cornerstone; competes for air slot
+Shaman,Any,Windfury Totem,MeleeSwing,party,air,5,Extra melee swings; melee-group cornerstone; competes for air slot
 Shaman,Any,Wrath of Air Totem,Caster,party,air,4,Spell power; competes for air slot
 Shaman,Any,Grace of Air Totem,"Melee,Ranged",party,air,2,Agility; competes for air slot
 Shaman,Elemental,Totem of Wrath,Caster,party,fire,5,Spell hit & crit; talent; competes for fire slot

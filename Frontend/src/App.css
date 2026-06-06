@@ -310,6 +310,11 @@ button, select { cursor: pointer; font: inherit; }
   flex-shrink: 0;
   margin-right: 6px;
 }
+.role-icon {
+  margin-left: auto;
+  margin-right: 0;
+  opacity: 0.75;
+}
 
 /* ── Keep-together badge ───────────────────────── */
 .kt-badge {

@@ -17,6 +17,13 @@ const KT_LABELS = ['A', 'B', 'C', 'D', 'E']
 const TANK_KEYS   = new Set(['Warrior/Protection', 'Paladin/Protection', 'Druid/Feral (Bear)'])
 const HEALER_KEYS = new Set(['Paladin/Holy', 'Priest/Discipline', 'Priest/Holy', 'Shaman/Restoration', 'Druid/Restoration'])
 
+const ROLE_ICONS = {
+  Tank:   '/icons/tank.jpg',
+  Healer: '/icons/healer.jpg',
+  Melee:  '/icons/melee.jpg',
+  Ranged: '/icons/ranged.jpg',
+}
+
 const ROLE_MAP = {
   'Warrior/Arms': 'Melee',        'Warrior/Fury': 'Melee',       'Warrior/Protection': 'Tank',
   'Paladin/Holy': 'Healer',       'Paladin/Protection': 'Tank',   'Paladin/Retribution': 'Melee',
@@ -58,7 +65,7 @@ function specIcon(className, spec) {
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
     .replace(/-$/, '')
-  return `/specs/${slug}.jpg`
+  return `/icons/${slug}.jpg`
 }
 
 // Player-chip droppables take priority over group-card droppables
@@ -105,6 +112,12 @@ function DraggablePlayer({ player, groupIdx }) {
         onError={e => { e.target.style.display = 'none' }}
       />
       {player.label ?? `${player.spec} ${player.class_name}`}
+      <img
+        src={ROLE_ICONS[ROLE_MAP[`${player.class_name}/${player.spec}`] ?? 'Ranged']}
+        alt=""
+        className="spec-icon role-icon"
+        onError={e => { e.target.style.display = 'none' }}
+      />
     </li>
   )
 }
@@ -574,16 +587,19 @@ export default function App() {
                 return (
                   <>
                     <div className="raid-stats">
-                      <span className="stat-item"><span className="stat-label">Tanks</span><strong>{roles.Tank}</strong></span>
-                      <span className="stat-item"><span className="stat-label">Healers</span><strong>{roles.Healer}</strong></span>
-                      <span className="stat-item"><span className="stat-label">Melee DPS</span><strong>{roles.Melee}</strong></span>
-                      <span className="stat-item"><span className="stat-label">Ranged DPS</span><strong>{roles.Ranged}</strong></span>
+                      {[['Tank','Tanks'],['Healer','Healers'],['Melee','Melee DPS'],['Ranged','Ranged DPS']].map(([role, label]) => (
+                        <span key={role} className="stat-item">
+                          <img src={ROLE_ICONS[role]} alt={label} className="spec-icon" onError={e => { e.target.style.display = 'none' }} />
+                          <span className="stat-label">{label}</span>
+                          <strong>{roles[role]}</strong>
+                        </span>
+                      ))}
                     </div>
                     <div className="raid-stats">
                       {classEntries.map(([cls, n]) => (
                         <span key={cls} className="stat-item">
                           <img
-                            src={`/specs/${cls.toLowerCase()}.jpg`}
+                            src={`/icons/${cls.toLowerCase()}.jpg`}
                             alt=""
                             className="spec-icon"
                             onError={e => { e.target.style.display = 'none' }}
