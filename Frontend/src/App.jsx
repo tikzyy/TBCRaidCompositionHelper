@@ -159,7 +159,7 @@ function DraggablePlayer({ player, groupIdx }) {
 }
 
 // ── Droppable group card ─────────────────────────────────────────────
-function DroppableGroupCard({ index, group, isOver }) {
+function DroppableGroupCard({ index, group, isOver, isLeftover }) {
   const { setNodeRef } = useDroppable({ id: `group-${index - 1}` })
   return (
     <div
@@ -167,7 +167,15 @@ function DroppableGroupCard({ index, group, isOver }) {
       className={`group-card ${isOver ? 'drop-target' : ''}`}
     >
       <div className="group-header">
-        <span className="group-title">Group {index}</span>
+        <span className="group-title">
+          Group {index}
+          {isLeftover && (
+            <span
+              className="leftover-warning"
+              title="Less than ideal synergy; these classes share few beneficial buffs with each other or lose value from certain buffs."
+            >⚠</span>
+          )}
+        </span>
         <span className="group-score">{group.score} pts</span>
       </div>
       <ul className="group-players">
@@ -188,7 +196,18 @@ function DroppableGroupCard({ index, group, isOver }) {
       </ul>
       {group.active_buffs.length > 0 && (
         <div className="buff-list">
-          {group.active_buffs.map(b => <span key={b} className="buff-tag">{b}</span>)}
+          {group.active_buffs.map(b => {
+            const color = CLASS_COLORS[b.class_name] ?? 'var(--dim)'
+            return (
+              <span
+                key={b.ability}
+                className="buff-tag"
+                style={{ borderColor: color, color }}
+              >
+                {b.count > 1 ? `${b.ability} ×${b.count}` : b.ability}
+              </span>
+            )
+          })}
         </div>
       )}
     </div>
@@ -604,17 +623,28 @@ export default function App() {
                 onDragEnd={handleDragEnd}
               >
                 <div className="groups-grid">
-                  {results.groups
-                    .filter(g => g.players.length > 0 || results.groups.some(x => x.players.length > 0))
-                    .map((group, i) => (
-                      <DroppableGroupCard
-                        key={i}
-                        index={i + 1}
-                        group={group}
-                        isOver={overId === `group-${i}`}
-                      />
-                    ))
-                  }
+                  {(() => {
+                    const nonEmpty = results.groups.filter(g => g.players.length > 0)
+                    const mean = nonEmpty.length > 0
+                      ? nonEmpty.reduce((s, g) => s + g.score, 0) / nonEmpty.length
+                      : 0
+                    const threshold = mean * 0.8
+                    return results.groups
+                      .filter(g => g.players.length > 0 || nonEmpty.length > 0)
+                      .map((group, i) => (
+                        <DroppableGroupCard
+                          key={i}
+                          index={i + 1}
+                          group={group}
+                          isOver={overId === `group-${i}`}
+                          isLeftover={
+                            group.players.length > 0 &&
+                            nonEmpty.length >= 3 &&
+                            group.score < threshold
+                          }
+                        />
+                      ))
+                  })()}
                 </div>
 
                 <DragOverlay>

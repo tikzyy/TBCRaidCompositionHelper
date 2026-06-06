@@ -21,10 +21,16 @@ class PlayerOut(BaseModel):
     spec: str
 
 
+class BuffOut(BaseModel):
+    ability: str
+    class_name: str
+    count: int = 1
+
+
 class GroupOut(BaseModel):
     players: list[PlayerOut]
     score: float
-    active_buffs: list[str]
+    active_buffs: list[BuffOut]
 
 
 class OptimiseResponse(BaseModel):

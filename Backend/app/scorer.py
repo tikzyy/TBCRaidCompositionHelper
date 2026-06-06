@@ -92,10 +92,18 @@ def score_group(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> f
     return sum(_realised(b, group_benefits, w) for b, w in chosen)
 
 
-def get_active_buffs(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> list[str]:
-    """Names of party buffs active in this group after exclusive selection and deduplication."""
+def get_active_buffs(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> list[dict]:
+    """Party buffs active in this group, with provider class and stack count."""
     chosen, _ = _chosen_buffs(group, specs_lookup, buffs)
-    return [b.ability for b, _ in chosen]
+    result: list[dict] = []
+    index: dict[str, int] = {}
+    for b, _ in chosen:
+        if b.ability in index:
+            result[index[b.ability]]["count"] += 1
+        else:
+            index[b.ability] = len(result)
+            result.append({"ability": b.ability, "class_name": b.class_name, "count": 1})
+    return result
 
 
 def score_partition(groups: list[list[Player]], specs_lookup: dict, buffs: list[Buff]) -> float:
