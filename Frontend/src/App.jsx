@@ -7,11 +7,29 @@ import {
   useSensors,
   useDroppable,
   useDraggable,
+  pointerWithin,
 } from '@dnd-kit/core'
 import './App.css'
 
 const API = 'http://localhost:8000'
 const KT_LABELS = ['A', 'B', 'C', 'D', 'E']
+
+const TANK_KEYS   = new Set(['Warrior/Protection', 'Paladin/Protection', 'Druid/Feral (Bear)'])
+const HEALER_KEYS = new Set(['Paladin/Holy', 'Priest/Discipline', 'Priest/Holy', 'Shaman/Restoration', 'Druid/Restoration'])
+
+const ROLE_MAP = {
+  'Warrior/Arms': 'Melee',        'Warrior/Fury': 'Melee',       'Warrior/Protection': 'Tank',
+  'Paladin/Holy': 'Healer',       'Paladin/Protection': 'Tank',   'Paladin/Retribution': 'Melee',
+  'Hunter/Beast Mastery': 'Ranged', 'Hunter/Marksmanship': 'Ranged', 'Hunter/Survival': 'Ranged',
+  'Rogue/Any': 'Melee',
+  'Priest/Discipline': 'Healer',  'Priest/Holy': 'Healer',       'Priest/Shadow': 'Ranged',
+  'Shaman/Elemental': 'Ranged',   'Shaman/Enhancement': 'Melee', 'Shaman/Restoration': 'Healer',
+  'Mage/Arcane': 'Ranged',        'Mage/Fire': 'Ranged',         'Mage/Frost': 'Ranged',
+  'Warlock/Affliction': 'Ranged', 'Warlock/Demonology': 'Ranged','Warlock/Destruction': 'Ranged',
+  'Druid/Balance': 'Ranged',      'Druid/Feral (Cat)': 'Melee',
+  'Druid/Feral (Bear)': 'Tank',   'Druid/Restoration': 'Healer',
+}
+
 const CLASS_COLORS = {
   Warrior: '#C69B3A',
   Paladin: '#F48CBA',
@@ -28,20 +46,64 @@ function makeId() {
   return `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
 }
 
-// ── Draggable player chip inside a group card ────────────────────────
+function makeLabel(cls, spec, n) {
+  const base = spec === 'Any' ? cls : `${spec} ${cls}`
+  return n <= 1 ? base : `${base} ${n}`
+}
+
+function specIcon(className, spec) {
+  const slug = `${className}-${spec}`
+    .toLowerCase()
+    .replace(/[()]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/-$/, '')
+  return `/specs/${slug}.jpg`
+}
+
+// Player-chip droppables take priority over group-card droppables
+function collisionDetection(args) {
+  const playerHits = pointerWithin({
+    ...args,
+    droppableContainers: args.droppableContainers.filter(c =>
+      c.id.toString().startsWith('player-drop-')
+    ),
+  })
+  if (playerHits.length > 0) return playerHits
+  return pointerWithin({
+    ...args,
+    droppableContainers: args.droppableContainers.filter(c =>
+      c.id.toString().startsWith('group-')
+    ),
+  })
+}
+
+// ── Draggable + droppable player chip inside a group card ────────────
 function DraggablePlayer({ player, groupIdx }) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+  const { attributes, listeners, setNodeRef: setDragRef, isDragging } = useDraggable({
     id: player.id,
     data: { player, groupIdx },
   })
+  const { setNodeRef: setDropRef, isOver } = useDroppable({
+    id: `player-drop-${player.id}`,
+    data: { player, groupIdx },
+  })
+  const setRef = useCallback(node => { setDragRef(node); setDropRef(node) }, [setDragRef, setDropRef])
+
   return (
     <li
-      ref={setNodeRef}
-      className={`group-player draggable ${isDragging ? 'dragging' : ''}`}
+      ref={setRef}
+      className={`group-player draggable ${isDragging ? 'dragging' : ''} ${isOver && !isDragging ? 'player-drop-target' : ''}`}
       style={{ borderLeftColor: CLASS_COLORS[player.class_name] ?? '#666' }}
       {...attributes}
       {...listeners}
     >
+      <img
+        src={specIcon(player.class_name, player.spec)}
+        alt=""
+        className="spec-icon"
+        onError={e => { e.target.style.display = 'none' }}
+      />
       {player.label ?? `${player.spec} ${player.class_name}`}
     </li>
   )
@@ -92,6 +154,7 @@ export default function App() {
   const [error, setError]         = useState(null)
   const [activeId, setActiveId]   = useState(null)
   const [overId, setOverId]       = useState(null)
+  const [rosterTab, setRosterTab] = useState('players')
 
   const scoreDebounce = useRef(null)
 
@@ -117,7 +180,7 @@ export default function App() {
   function addPlayer() {
     if (players.length >= raidSize) return
     const n = players.filter(p => p.class_name === selClass && p.spec === selSpec).length
-    const label = n === 0 ? `${selSpec} ${selClass}` : `${selSpec} ${selClass} ${n + 1}`
+    const label = makeLabel(selClass, selSpec, n + 1)
     setPlayers(prev => [...prev, { id: makeId(), class_name: selClass, spec: selSpec, label, ktGroup: null }])
     setResults(null)
   }
@@ -133,6 +196,42 @@ export default function App() {
 
   function clearAll() {
     setPlayers([])
+    setResults(null)
+    setError(null)
+  }
+
+  function fillRoster() {
+    const allSpecs = meta.classes.flatMap(c =>
+      c.specs.map(s => ({ class_name: c.class_name, spec: s.spec }))
+    )
+    const key = s => `${s.class_name}/${s.spec}`
+    const tanks   = allSpecs.filter(s => TANK_KEYS.has(key(s)))
+    const healers  = allSpecs.filter(s => HEALER_KEYS.has(key(s)))
+
+    const shuffle = arr => [...arr].sort(() => Math.random() - 0.5)
+
+    const healerCount = raidSize === 10 ? 2 : 5
+    const pool = [
+      ...shuffle(tanks).slice(0, 2),
+      ...shuffle(healers).slice(0, healerCount),
+    ]
+
+    const dpsSpecs = allSpecs.filter(s => !TANK_KEYS.has(key(s)) && !HEALER_KEYS.has(key(s)))
+    const dpsShuffled = shuffle(dpsSpecs)
+    let i = 0
+    while (pool.length < raidSize) {
+      pool.push(dpsShuffled[i % dpsShuffled.length])
+      i++
+    }
+
+    const labelCounts = {}
+    const newPlayers = pool.map(({ class_name, spec }) => {
+      const key = `${spec}/${class_name}`
+      labelCounts[key] = (labelCounts[key] ?? 0) + 1
+      return { id: makeId(), class_name, spec, label: makeLabel(class_name, spec, labelCounts[key]), ktGroup: null }
+    })
+
+    setPlayers(newPlayers)
     setResults(null)
     setError(null)
   }
@@ -178,7 +277,6 @@ export default function App() {
     }
   }
 
-  // Re-score the current manual arrangement
   const rescoreGroups = useCallback(async (groups) => {
     setScoring(true)
     try {
@@ -193,7 +291,6 @@ export default function App() {
       })
       if (!resp.ok) return
       const data = await resp.json()
-      // Preserve player labels — only update scores and active_buffs
       setResults(prev => ({
         ...prev,
         total_score: data.total_score,
@@ -228,32 +325,47 @@ export default function App() {
     if (!over || !results) return
 
     const fromGroupIdx = active.data.current.groupIdx
-    const toGroupIdx   = parseInt(over.id.replace('group-', ''), 10)
-    if (fromGroupIdx === toGroupIdx) return
-
     const playerId = active.id
-    const fromGroup = results.groups[fromGroupIdx]
-    const toGroup   = results.groups[toGroupIdx]
-
-    if (toGroup.players.length >= 5) return
-
-    const movedPlayer = fromGroup.players.find(p => p.id === playerId)
+    const movedPlayer = results.groups[fromGroupIdx]?.players.find(p => p.id === playerId)
     if (!movedPlayer) return
 
-    const newGroups = results.groups.map((g, i) => {
-      if (i === fromGroupIdx) return { ...g, players: g.players.filter(p => p.id !== playerId) }
-      if (i === toGroupIdx)   return { ...g, players: [...g.players, movedPlayer] }
-      return g
-    })
+    const isPlayerTarget = over.id.toString().startsWith('player-drop-')
+    let toGroupIdx
+    let targetPlayerId = null
+
+    if (isPlayerTarget) {
+      targetPlayerId = over.id.toString().replace('player-drop-', '')
+      if (targetPlayerId === playerId) return
+      toGroupIdx = results.groups.findIndex(g => g.players.some(p => p.id === targetPlayerId))
+    } else {
+      toGroupIdx = parseInt(over.id.toString().replace('group-', ''), 10)
+    }
+
+    if (toGroupIdx === -1 || fromGroupIdx === toGroupIdx) return
+
+    let newGroups
+    if (isPlayerTarget) {
+      // Swap the two players between their groups
+      const targetPlayer = results.groups[toGroupIdx].players.find(p => p.id === targetPlayerId)
+      newGroups = results.groups.map((g, i) => {
+        if (i === fromGroupIdx) return { ...g, players: g.players.map(p => p.id === playerId ? targetPlayer : p) }
+        if (i === toGroupIdx)   return { ...g, players: g.players.map(p => p.id === targetPlayerId ? movedPlayer : p) }
+        return g
+      })
+    } else {
+      if (results.groups[toGroupIdx].players.length >= 5) return
+      newGroups = results.groups.map((g, i) => {
+        if (i === fromGroupIdx) return { ...g, players: g.players.filter(p => p.id !== playerId) }
+        if (i === toGroupIdx)   return { ...g, players: [...g.players, movedPlayer] }
+        return g
+      })
+    }
 
     setResults(prev => ({ ...prev, groups: newGroups }))
-
-    // Debounce the re-score call by 150 ms so rapid drags don't flood the API
     clearTimeout(scoreDebounce.current)
     scoreDebounce.current = setTimeout(() => rescoreGroups(newGroups), 150)
   }
 
-  // Find the dragged player for the overlay
   const draggedPlayer = activeId && results
     ? results.groups.flatMap(g => g.players).find(p => p.id === activeId)
     : null
@@ -286,47 +398,95 @@ export default function App() {
         <aside className="panel roster-panel">
           <div className="panel-header">
             <h2>Roster</h2>
-            {players.length > 0 && (
-              <button className="ghost-btn danger" onClick={clearAll}>Clear all</button>
-            )}
+            <div className="header-actions">
+              <button className="ghost-btn" onClick={fillRoster}>Fill sample</button>
+              {players.length > 0 && (
+                <button className="ghost-btn danger" onClick={clearAll}>Clear all</button>
+              )}
+            </div>
           </div>
 
-          <div className="add-row">
-            <select value={selClass} onChange={e => handleClassChange(e.target.value)}>
-              {meta.classes.map(c => (
-                <option key={c.class_name} value={c.class_name}>{c.class_name}</option>
-              ))}
-            </select>
-            <select value={selSpec} onChange={e => setSelSpec(e.target.value)}>
-              {classSpecs.map(s => (
-                <option key={s.spec} value={s.spec}>{s.spec}</option>
-              ))}
-            </select>
-            <button className="add-btn" onClick={addPlayer} disabled={players.length >= raidSize}>
-              + Add
+          <div className="roster-tabs">
+            <button
+              className={`tab-btn ${rosterTab === 'players' ? 'active' : ''}`}
+              onClick={() => setRosterTab('players')}
+            >
+              Players
+            </button>
+            <button
+              className={`tab-btn ${rosterTab === 'keep-together' ? 'active' : ''}`}
+              onClick={() => setRosterTab('keep-together')}
+            >
+              Group Together
             </button>
           </div>
 
-          <div className="player-list">
-            {players.length === 0 && <p className="dim hint">Add players above to build your roster.</p>}
-            {players.map(p => (
-              <div key={p.id} className="player-row">
-                <span className="player-label" style={{ borderLeftColor: CLASS_COLORS[p.class_name] ?? '#666' }}>
-                  {p.label}
-                </span>
-                <select
-                  className="kt-select"
-                  value={p.ktGroup ?? ''}
-                  onChange={e => setKtGroup(p.id, e.target.value)}
-                  title="Lock together with players in the same group"
-                >
-                  <option value="">—</option>
-                  {KT_LABELS.map(l => <option key={l} value={l}>Lock {l}</option>)}
+          {rosterTab === 'players' ? (
+            <>
+              <div className="add-row">
+                <select value={selClass} onChange={e => handleClassChange(e.target.value)}>
+                  {meta.classes.map(c => (
+                    <option key={c.class_name} value={c.class_name}>{c.class_name}</option>
+                  ))}
                 </select>
-                <button className="remove-btn" onClick={() => removePlayer(p.id)} title="Remove">✕</button>
+                <select value={selSpec} onChange={e => setSelSpec(e.target.value)}>
+                  {classSpecs.map(s => (
+                    <option key={s.spec} value={s.spec}>{s.spec}</option>
+                  ))}
+                </select>
+                <button className="add-btn" onClick={addPlayer} disabled={players.length >= raidSize}>
+                  + Add
+                </button>
               </div>
-            ))}
-          </div>
+              <div className="player-list">
+                {players.length === 0 && (
+                  <p className="dim hint">Add players above to build your roster.</p>
+                )}
+                {players.map(p => (
+                  <div key={p.id} className="player-row">
+                    <img
+                      src={specIcon(p.class_name, p.spec)}
+                      alt=""
+                      className="spec-icon"
+                      onError={e => { e.target.style.display = 'none' }}
+                    />
+                    <span className="player-label" style={{ borderLeftColor: CLASS_COLORS[p.class_name] ?? '#666' }}>
+                      {p.label}
+                    </span>
+                    {p.ktGroup && <span className="kt-badge">{p.ktGroup}</span>}
+                    <button className="remove-btn" onClick={() => removePlayer(p.id)} title="Remove">✕</button>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="player-list">
+              {players.length === 0 ? (
+                <p className="dim hint">Add players in the Players tab first.</p>
+              ) : (
+                <>
+                  <p className="dim hint kt-hint">
+                    Players sharing a letter will be placed in the same group.
+                  </p>
+                  {players.map(p => (
+                    <div key={p.id} className="player-row">
+                      <span className="player-label" style={{ borderLeftColor: CLASS_COLORS[p.class_name] ?? '#666' }}>
+                        {p.label}
+                      </span>
+                      <select
+                        className="kt-select"
+                        value={p.ktGroup ?? ''}
+                        onChange={e => setKtGroup(p.id, e.target.value)}
+                      >
+                        <option value="">—</option>
+                        {KT_LABELS.map(l => <option key={l} value={l}>{l}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
 
           <button className="optimise-btn" onClick={optimise} disabled={loading || players.length === 0}>
             {loading ? 'Optimising…' : 'Optimise →'}
@@ -356,8 +516,8 @@ export default function App() {
                 {results.score_delta !== null && (
                   <span className={`kt-delta ${results.score_delta < 0 ? 'negative' : 'positive'}`}>
                     {results.score_delta < 0
-                      ? `Keep-together cost: ${results.score_delta} pts (unconstrained: ${results.unconstrained_score})`
-                      : 'Keep-together constraints had no cost'}
+                      ? `Group-together cost: ${results.score_delta} pts (unconstrained: ${results.unconstrained_score})`
+                      : 'Group-together constraints had no cost'}
                   </span>
                 )}
                 <span className="dim drag-hint">Drag players between groups to adjust manually.</span>
@@ -365,6 +525,7 @@ export default function App() {
 
               <DndContext
                 sensors={sensors}
+                collisionDetection={collisionDetection}
                 onDragStart={handleDragStart}
                 onDragOver={handleDragOver}
                 onDragEnd={handleDragEnd}
@@ -389,11 +550,52 @@ export default function App() {
                       className="drag-overlay-chip"
                       style={{ borderLeftColor: CLASS_COLORS[draggedPlayer.class_name] ?? '#666' }}
                     >
+                      <img
+                        src={specIcon(draggedPlayer.class_name, draggedPlayer.spec)}
+                        alt=""
+                        className="spec-icon"
+                        onError={e => { e.target.style.display = 'none' }}
+                      />
                       {draggedPlayer.label ?? `${draggedPlayer.spec} ${draggedPlayer.class_name}`}
                     </div>
                   )}
                 </DragOverlay>
               </DndContext>
+
+              {(() => {
+                const roles = { Tank: 0, Healer: 0, Melee: 0, Ranged: 0 }
+                const classes = {}
+                results.groups.forEach(g => g.players.forEach(p => {
+                  roles[ROLE_MAP[`${p.class_name}/${p.spec}`] ?? 'Ranged']++
+                  classes[p.class_name] = (classes[p.class_name] ?? 0) + 1
+                }))
+                const classEntries = Object.keys(CLASS_COLORS)
+                  .map(c => [c, classes[c] ?? 0])
+                return (
+                  <>
+                    <div className="raid-stats">
+                      <span className="stat-item"><span className="stat-label">Tanks</span><strong>{roles.Tank}</strong></span>
+                      <span className="stat-item"><span className="stat-label">Healers</span><strong>{roles.Healer}</strong></span>
+                      <span className="stat-item"><span className="stat-label">Melee DPS</span><strong>{roles.Melee}</strong></span>
+                      <span className="stat-item"><span className="stat-label">Ranged DPS</span><strong>{roles.Ranged}</strong></span>
+                    </div>
+                    <div className="raid-stats">
+                      {classEntries.map(([cls, n]) => (
+                        <span key={cls} className="stat-item">
+                          <img
+                            src={`/specs/${cls.toLowerCase()}.jpg`}
+                            alt=""
+                            className="spec-icon"
+                            onError={e => { e.target.style.display = 'none' }}
+                          />
+                          <span className="stat-label">{cls}</span>
+                          <strong>{n}</strong>
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )
+              })()}
             </>
           )}
         </section>
