@@ -124,6 +124,7 @@ button, select { cursor: pointer; font: inherit; }
   font-size: 12px;
   transition: border-color 0.15s, color 0.15s;
 }
+.ghost-btn:hover:not(.danger) { border-color: var(--accent); color: var(--accent); }
 .ghost-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
 
 /* ── Add player row ────────────────────────────── */
@@ -184,6 +185,20 @@ button, select { cursor: pointer; font: inherit; }
   border-left: 3px solid #666;
   padding-left: 8px;
   font-size: 13px;
+}
+.player-label-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 13px;
+  background: transparent;
+  color: var(--text);
+  border-left: 3px solid #666;
+  border-top: none;
+  border-right: none;
+  border-bottom: 1px solid var(--accent);
+  padding: 0 0 0 8px;
+  outline: none;
 }
 .kt-select {
   width: 76px;

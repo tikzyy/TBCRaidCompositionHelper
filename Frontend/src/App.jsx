@@ -172,7 +172,7 @@ function DroppableGroupCard({ index, group, isOver, isLeftover }) {
           {isLeftover && (
             <span
               className="leftover-warning"
-              title="Less than ideal synergy; these classes share few beneficial buffs with each other or lose value from certain buffs."
+              title="Less than ideal synergy; these classes share few beneficial buffs with each other, lacks strong synergising buffs or lose value from contradicting class archetypes."
             >⚠</span>
           )}
         </span>
@@ -229,8 +229,17 @@ export default function App() {
   const [activeId, setActiveId]   = useState(null)
   const [overId, setOverId]       = useState(null)
   const [rosterTab, setRosterTab] = useState('players')
+  const [editingId, setEditingId] = useState(null)
+  const [editValue, setEditValue] = useState('')
 
-  const scoreDebounce = useRef(null)
+  const scoreDebounce    = useRef(null)
+  const optimiseDebounce = useRef(null)
+
+  useEffect(() => {
+    clearTimeout(optimiseDebounce.current)
+    if (players.length === 0) { setResults(null); return }
+    optimiseDebounce.current = setTimeout(optimise, 300)
+  }, [players]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     fetch(`${API}/meta`)
@@ -256,12 +265,10 @@ export default function App() {
     const n = players.filter(p => p.class_name === selClass && p.spec === selSpec).length
     const label = makeLabel(selClass, selSpec, n + 1)
     setPlayers(prev => [...prev, { id: makeId(), class_name: selClass, spec: selSpec, label, ktGroup: null }])
-    setResults(null)
   }
 
   function removePlayer(id) {
     setPlayers(prev => prev.filter(p => p.id !== id))
-    setResults(null)
   }
 
   function setKtGroup(id, group) {
@@ -272,6 +279,21 @@ export default function App() {
     setPlayers([])
     setResults(null)
     setError(null)
+  }
+
+  function commitLabel(id) {
+    const trimmed = editValue.trim()
+    if (trimmed) {
+      setPlayers(prev => prev.map(p => p.id === id ? { ...p, label: trimmed } : p))
+      setResults(prev => prev ? {
+        ...prev,
+        groups: prev.groups.map(g => ({
+          ...g,
+          players: g.players.map(p => p.id === id ? { ...p, label: trimmed } : p),
+        })),
+      } : prev)
+    }
+    setEditingId(null)
   }
 
   function weightedPick(specs) {
@@ -331,7 +353,6 @@ export default function App() {
   async function optimise() {
     setLoading(true)
     setError(null)
-    setResults(null)
 
     const ktMap = {}
     players.forEach(p => {
@@ -542,9 +563,29 @@ export default function App() {
                       className="spec-icon"
                       onError={e => { e.target.style.display = 'none' }}
                     />
-                    <span className="player-label" style={{ borderLeftColor: CLASS_COLORS[p.class_name] ?? '#666' }}>
-                      {p.label}
-                    </span>
+                    {editingId === p.id ? (
+                      <input
+                        className="player-label-input"
+                        style={{ borderLeftColor: CLASS_COLORS[p.class_name] ?? '#666' }}
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onBlur={() => commitLabel(p.id)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter')  commitLabel(p.id)
+                          if (e.key === 'Escape') setEditingId(null)
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      <span
+                        className="player-label"
+                        style={{ borderLeftColor: CLASS_COLORS[p.class_name] ?? '#666' }}
+                        onDoubleClick={() => { setEditingId(p.id); setEditValue(p.label) }}
+                        title="Double-click to rename"
+                      >
+                        {p.label}
+                      </span>
+                    )}
                     {p.ktGroup && <span className="kt-badge">{p.ktGroup}</span>}
                     <button className="remove-btn" onClick={() => removePlayer(p.id)} title="Remove">✕</button>
                   </div>
@@ -591,13 +632,13 @@ export default function App() {
         <section className="panel results-panel">
           <div className="panel-header">
             <h2>Groups</h2>
-            {scoring && <span className="dim" style={{ fontSize: 12 }}>Scoring…</span>}
+            {(scoring || loading) && <span className="dim" style={{ fontSize: 12 }}>{loading ? 'Optimising…' : 'Scoring…'}</span>}
           </div>
 
           {!results && !loading && (
-            <p className="dim hint">Hit <strong>Optimise</strong> to assign players into groups.</p>
+            <p className="dim hint">Add players to your roster to see groups form.</p>
           )}
-          {loading && <p className="dim hint">Running…</p>}
+          {!results && loading && <p className="dim hint">Running…</p>}
 
           {results && (
             <>

@@ -6,12 +6,14 @@ Shaman,Enhancement,Grace of Air Totem,"Melee,Ranged",party,air_twist,3,,Twisted 
 Shaman,Enhancement,Wrath of Air Totem,Caster,party,air_twist,4,,Twisted with Windfury; Enhancement only; wins if casters outnumber melee
 Shaman,Elemental,Totem of Wrath,Caster,party,fire,5,0.66,Spell hit & crit; stacks across multiple Elemental Shamans at 50% decay
 Shaman,Restoration,Mana Tide Totem,Mana,party,water,1,,Cooldown; large party mana restore; talent; temporarily overrides water totem
-Paladin,Any,Devotion Aura,Defensive,party,aura,0,,Armor; only one aura active at a time
-Paladin,Any,Retribution Aura,Melee,party,aura,0,,Holy damage to attackers; aura slot
-Paladin,Any,Concentration Aura,Caster,party,aura,0,,Reduces casting pushback; aura slot
+Paladin,Any,Devotion Aura,Defensive,raid,aura,0,,Armor; raid-wide in TBC; only one aura active at a time
+Paladin,Any,Retribution Aura,Melee,raid,aura,0,,Holy damage to attackers; raid-wide in TBC; aura slot
+Paladin,Any,Concentration Aura,Caster,raid,aura,0,,Reduces casting pushback; raid-wide in TBC; aura slot
 Paladin,Any,Greater Blessing of Might,"Melee,Ranged",raid,blessing,0,,Per-class raid-wide AP; not group-positional
 Paladin,Any,Greater Blessing of Wisdom,Mana,raid,blessing,0,,Per-class raid-wide mp5
 Paladin,Any,Greater Blessing of Kings,Universal,raid,blessing,0,,Per-class raid-wide +10% stats; talent
+Paladin,Any,Greater Blessing of Sanctuary,Universal,raid,blessing,0,,
+Paladin,Any,Greater Blessing of Light,Universal,raid,blessing,0,,
 Paladin,Any,Greater Blessing of Salvation,Defensive,raid,blessing,0,,Per-class raid-wide threat reduction
 Hunter,Marksmanship,Trueshot Aura,"Melee,Ranged",party,,3,0,AP buff; party-wide
 Hunter,Beast Mastery,Ferocious Inspiration,Universal,party,,2,0.25,+3% party damage when pet crits; talent
@@ -20,7 +22,6 @@ Warrior,Any,Commanding Shout,Defensive,party,shout,0,,Max health; party-wide
 Priest,Any,Prayer of Fortitude,Universal,raid,,5,,Stamina; raid-wide
 Priest,Discipline,Prayer of Spirit,Mana,raid,,5,,Spirit; talent; raid-wide
 Priest,Shadow,Vampiric Touch,Mana,party,,3,,Returns mana to party from shadow damage; caster-group cornerstone
-Priest,Shadow,Vampiric Embrace,Defensive,party,,1,,Party healing from shadow priest's damage
 Mage,Any,Arcane Brilliance,Mana,raid,,5,,Intellect (mana pool + spell crit); raid-wide
 Druid,Feral,Leader of the Pack,"Melee,Ranged",party,,4,0,5% party crit; matches Feral (Cat) and Feral (Bear)
 Druid,Any,Mark of the Wild (Improved),Universal,raid,,5,,Stats & resistances; cast on all (raid-wide)
