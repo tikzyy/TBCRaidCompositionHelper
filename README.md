@@ -7,6 +7,8 @@ into optimal 5-player groups based on buff synergy.
 Most of the code was generated using Claude Code, with only minor changes being manually handled. 
 The underlying concept, scoring system, and the per-spec weight values were researched and decided upon independent of AI.
 
+![App screenshot](assets/screenshot.png)
+
 ---
 
 ## Prerequisites
