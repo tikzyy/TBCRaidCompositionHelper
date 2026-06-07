@@ -3,7 +3,9 @@
 A web app for arranging World of Warcraft: The Burning Crusade Classic raid members
 into optimal 5-player groups based on buff synergy. 
 
-DISCLAIMER: This project is partially vibe-coded. Most of the code was generated using Claude Code, with only minor changes being manually handled. The underlying concept, scoring system, and the per-spec weight values were researched and decided upon independent of AI.
+**DISCLAIMER**: This project is partially vibe-coded.
+Most of the code was generated using Claude Code, with only minor changes being manually handled. The underlying concept, scoring system, and the per-spec weight values were researched and decided upon independent of AI.
+
 ---
 
 ## Prerequisites
