@@ -42,6 +42,9 @@ htmlcov/
 .coverage
 .coverage.*
 
+# ---- Smoke test artifacts ----
+smoke-*.png
+
 # ---- OS cruft ----
 .DS_Store
 Thumbs.db
