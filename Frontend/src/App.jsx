@@ -788,9 +788,13 @@ export default function App() {
                 return (
                   <>
                     <div className="raid-stats">
-                      {[['Tank','Tanks'],['Healer','Healers'],['Melee','Melee DPS'],['Ranged','Ranged DPS']].map(([role, label]) => (
+                      {[['Tank',''],['Healer',''],['Melee',''],['Ranged','']].map(([role, label]) => (
                         <span key={role} className="stat-item">
-                          <img src={ROLE_ICONS[role]} alt={label} className="spec-icon" onError={e => { e.target.style.display = 'none' }} />
+                          <img 
+                            src={ROLE_ICONS[role]}
+                            alt={label}
+                            className="spec-icon"
+                            onError={e => { e.target.style.display = 'none' }} />
                           <span className="stat-label">{label}</span>
                           <strong>{roles[role]}</strong>
                         </span>
