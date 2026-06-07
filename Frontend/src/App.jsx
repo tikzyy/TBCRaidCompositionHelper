@@ -262,6 +262,7 @@ export default function App() {
   const [rosterTab, setRosterTab] = useState('players')
   const [editingId, setEditingId] = useState(null)
   const [editValue, setEditValue] = useState('')
+  const [showScoreInfo, setShowScoreInfo] = useState(false)
 
   const scoreDebounce    = useRef(null)
   const optimiseDebounce = useRef(null)
@@ -314,6 +315,7 @@ export default function App() {
     setPlayers([])
     setResults(null)
     setError(null)
+    setShowScoreInfo(false)
   }
 
   function commitLabel(id) {
@@ -686,6 +688,22 @@ export default function App() {
               <div className="score-bar">
                 <span className="total-score">
                   Total score: <strong>{results.total_score}</strong>
+                  <button
+                    className="score-info-btn"
+                    onClick={() => setShowScoreInfo(v => !v)}
+                    aria-label="Score explanation"
+                  >?</button>
+                  {showScoreInfo && (
+                    <div className="score-info-popup">
+                      The score reflects cumulative within-party buff synergy; the score is calculated based on how much each group member benefits from
+                      the active buffs their party provide. The tool is primarily intended to help with the initial grouping and to provide
+                      insight into the synergy between different classes. Group optimisation is based on the highest total cumulative score,
+                      some raid compositions may benefit from moving buff-providing classes from weaker groups to strengthen others. Tertiary
+                      factors such as gear or individual skill are not accounted for, these groupings may therefore not fully reflect optimal
+                      group compositions. Manual changes to the groups may be necessary to account for factors not considered by the score, or
+                      simply to accommodate personal preferences and social factors.
+                    </div>
+                  )}
                 </span>
                 {results.score_delta !== null && (
                   <span className={`kt-delta ${results.score_delta < 0 ? 'negative' : 'positive'}`}>
@@ -696,16 +714,6 @@ export default function App() {
                 )}
                 <span className="dim drag-hint">Drag players between groups to adjust manually.</span>
               </div>
-              <p className="dim hint" style={{ margin: '0 0 10px', padding: '0 14px' }}>
-                The score reflects cumulative within-party buff synergy; the score is calculated based on how much each group member benefits from
-                the active buffs their party provide. The tool is primarily intended to help with the initial grouping and to provide 
-                insight into the synergy between different classes. Group optimisation is based on the highest total cumulitative score, 
-                some raid compositions may benefit from moving buff-providing classes from weaker groups to strenghten others. Tertiary 
-                factors such as gear or individual skill are not accounted for, these groupings may therefore not fully reflect optimal 
-                group compositions. Manual changes to the groups may be necessary to account for factors not considered by the score, or 
-                simply to accommodate personal preferences and social factors.
-              </p>
-
               <DndContext
                 sensors={sensors}
                 collisionDetection={collisionDetection}

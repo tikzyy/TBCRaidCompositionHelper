@@ -251,7 +251,41 @@ button, select { cursor: pointer; font: inherit; }
   border-radius: var(--radius);
   margin-bottom: 16px;
 }
+.total-score { position: relative; }
 .total-score strong { color: var(--accent); font-size: 17px; }
+
+.score-info-btn {
+  margin-left: 7px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid var(--dim);
+  background: none;
+  color: var(--dim);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  vertical-align: middle;
+  transition: border-color 0.15s, color 0.15s;
+}
+.score-info-btn:hover { border-color: var(--text); color: var(--text); }
+.score-info-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: 420px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--dim);
+  line-height: 1.6;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  font-weight: 400;
+}
 .kt-delta { font-size: 12px; color: var(--dim); }
 .kt-delta.negative { color: var(--danger); }
 .kt-delta.positive { color: var(--success); }
