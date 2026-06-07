@@ -1,11 +1,16 @@
 """
 Scorer unit tests against hand-computed expected values.
 
-All expected scores are derived manually from provided_buffs.csv weights and the
-scoring formula:  realised(buff) = buff.weight * len([p for p in group if p benefits])
+Scoring formula:
+  realised(buff, group) = buff.weight * sum(
+      max(player_benefit_weight for each of buff's categories the player has)
+      for each player in group
+  )
 """
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -26,16 +31,24 @@ def p(id_, class_, spec):
 def test_air_slot_picks_windfury_for_melee_group():
     """
     Group: 1 Enhancement Shaman + 3 Fury Warriors.
-    Enhancement Shaman has air slot (all Shamans): Windfury (MeleeSwing w=5),
-    Wrath of Air (Caster w=4), Grace of Air (Melee+Ranged w=3).
-    Enhancement also has air_twist slot: Grace (Melee+Ranged w=3) or Wrath (Caster w=4).
-    All four benefit from MeleeSwing/Melee (weight 1.0 each); none from Caster.
-      air slot   -> Windfury  5*4 = 20  (best)
-      air_twist  -> Grace     3*4 = 12  (best secondary for this melee group)
-      Wrath of Air = 4*0 = 0 in both slots
-    Warriors provide Battle Shout (Melee+Ranged w=2), deduplicated to one instance.
-      Battle Shout = 2*4 = 8
-    Total = 20 + 12 + 8 = 40.
+
+    Enhancement Shaman air slot candidates (all Shaman Any rows):
+      Windfury      (MeleeSwing, w=5)  → 5 * (1.0+1.0+1.0+1.0) = 20.0  ← best
+      Wrath of Air  (SpellPower, w=4)  → 4 * 0                  =  0.0
+      Grace of Air  (Agility,    w=3)  → 3 * (0.6+0.5+0.5+0.5)  =  6.3
+
+    Enhancement air_twist slot (Enhancement-specific rows):
+      Grace of Air  (Agility,    w=3)  → 3 * (0.6+0.5+0.5+0.5)  =  6.3  ← best
+      Wrath of Air  (SpellPower, w=4)  → 4 * 0                  =  0.0
+
+    Enhancement earth slot:
+      Strength of Earth (Strength, w=3) → 3 * (1.0+1.0+1.0+1.0) = 12.0
+
+    Warriors provide Battle Shout (AttackPower, shout, w=2, stack_decay=0),
+    deduplicated to one instance:
+      Battle Shout → 2 * (1.0+1.0+1.0+1.0) = 8.0
+
+    Total = 20.0 + 6.3 + 12.0 + 8.0 = 46.3
     """
     group = [
         p("s1", "Shaman", "Enhancement"),
@@ -43,7 +56,7 @@ def test_air_slot_picks_windfury_for_melee_group():
         p("w2", "Warrior", "Fury"),
         p("w3", "Warrior", "Fury"),
     ]
-    assert score_group(group, SPECS, BUFFS) == 40.0
+    assert score_group(group, SPECS, BUFFS) == pytest.approx(46.3, abs=1e-6)
 
 
 # ---------------------------------------------------------------------------
@@ -52,15 +65,23 @@ def test_air_slot_picks_windfury_for_melee_group():
 def test_air_slot_picks_wrath_of_air_for_caster_group():
     """
     Group: 1 Elemental Shaman + 3 Fire Mages.
-    Fire Mage has Caster:0.9; Elemental Shaman has Caster:1.0.
-    Caster sum = 1.0 + 0.9*3 = 3.7; no Melee/MeleeSwing benefit.
-      Windfury realised      = 5 * 0    =  0
-      Wrath of Air           = 4 * 3.7  = 14.8  ← best air slot
-      Grace of Air           = 3 * 0    =  0
-    Elemental Shaman also has fire slot: Totem of Wrath (cat=Caster, w=5).
-      Totem of Wrath realised = 5 * 3.7 = 18.5
-    Mages provide Arcane Brilliance (cat=Mana, scope=raid) — raid scope, not scored.
-    Total = 14.8 + 18.5 = 33.3.
+
+    All four have SpellPower=1.0 and SpellCrit=1.0; none benefit from
+    MeleeSwing, Strength, or Agility.
+
+    Elemental Shaman air slot candidates (all Shaman Any rows):
+      Wrath of Air  (SpellPower, w=4) → 4 * (1.0+1.0+1.0+1.0) = 16.0  ← best
+      Windfury      (MeleeSwing, w=5) → 5 * 0                  =  0.0
+      Grace of Air  (Agility,    w=3) → 3 * 0                  =  0.0
+
+    Elemental Shaman fire slot:
+      Totem of Wrath (SpellCrit+SpellHit, w=5)
+        each player: max(SpellCrit=1.0, SpellHit=0.9 or 1.0) = 1.0
+        → 5 * (1.0+1.0+1.0+1.0) = 20.0
+
+    Strength of Earth (Strength, earth) → 0 (nobody benefits from Strength)
+
+    Total = 16.0 + 20.0 = 36.0
     """
     group = [
         p("s1", "Shaman", "Elemental"),
@@ -68,7 +89,7 @@ def test_air_slot_picks_wrath_of_air_for_caster_group():
         p("m2", "Mage", "Fire"),
         p("m3", "Mage", "Fire"),
     ]
-    assert score_group(group, SPECS, BUFFS) == 33.3
+    assert score_group(group, SPECS, BUFFS) == 36.0
 
 
 # ---------------------------------------------------------------------------
@@ -77,12 +98,15 @@ def test_air_slot_picks_wrath_of_air_for_caster_group():
 def test_duplicate_buff_counted_once():
     """
     Group: 2 Fury Warriors + 2 Arms Warriors.
-    Fury has Melee:1.0; Arms has Melee:0.9 (slightly weaker per CSV).
-    Both specs provide Battle Shout (shout slot, cat=Melee+Ranged, w=2, stack_decay=0).
-      Melee sum = 1.0 + 1.0 + 0.9 + 0.9 = 3.8
-      Battle Shout realised = 2 * 3.8 = 7.6 — counted ONCE despite 4 providers.
+
+    All provide Battle Shout (AttackPower, shout, w=2, stack_decay=0).
+    Deduplicated to one instance regardless of provider count.
+
+    AttackPower weights: Fury=1.0, Arms=0.9
+    Battle Shout realised = 2 * (1.0+1.0+0.9+0.9) = 2 * 3.8 = 7.6
+
     No other party buffs in this group.
-    Total = 7.6.
+    Total = 7.6
     """
     group = [
         p("w1", "Warrior", "Fury"),
@@ -90,4 +114,4 @@ def test_duplicate_buff_counted_once():
         p("w3", "Warrior", "Arms"),
         p("w4", "Warrior", "Arms"),
     ]
-    assert score_group(group, SPECS, BUFFS) == 7.6
+    assert score_group(group, SPECS, BUFFS) == pytest.approx(7.6, abs=1e-6)

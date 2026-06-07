@@ -85,6 +85,34 @@ const CLASS_COLORS = {
   Druid:   '#FF7C0A',
 }
 
+const BUFF_SPELL_IDS = {  // need these for Wowhead Tooltip integration.
+  'Windfury Totem':                25587,
+  'Wrath of Air Totem':            3738,
+  'Grace of Air Totem':            25359,
+  'Strength of Earth Totem':       25528,
+  'Totem of Wrath':                30706,
+  'Mana Tide Totem':               16190,
+  'Devotion Aura':                 10293,
+  'Retribution Aura':              10301,
+  'Concentration Aura':            19746,
+  'Greater Blessing of Might':     25782,
+  'Greater Blessing of Wisdom':    25894,
+  'Greater Blessing of Kings':     25898,
+  'Greater Blessing of Sanctuary': 25899,
+  'Greater Blessing of Light':     25890,
+  'Greater Blessing of Salvation': 25895,
+  'Trueshot Aura':                 19506,
+  'Ferocious Inspiration':         34460,
+  'Battle Shout':                  25289,
+  'Prayer of Fortitude':           25392,
+  'Prayer of Spirit':              27841,
+  'Vampiric Touch':                34914,
+  'Arcane Brilliance':             23028,
+  'Leader of the Pack':            17007,
+  'Mark of the Wild (Improved)':   27166,
+  'Moonkin Aura':                  24858,
+}
+
 function makeId() {
   return `p_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`
 }
@@ -198,15 +226,16 @@ function DroppableGroupCard({ index, group, isOver, isLeftover }) {
         <div className="buff-list">
           {group.active_buffs.map(b => {
             const color = CLASS_COLORS[b.class_name] ?? 'var(--dim)'
-            return (
-              <span
-                key={b.ability}
-                className="buff-tag"
-                style={{ borderColor: color, color }}
-              >
-                {b.count > 1 ? `${b.ability} ×${b.count}` : b.ability}
-              </span>
-            )
+            const spellId = BUFF_SPELL_IDS[b.ability]
+            const label = b.count > 1 ? `${b.ability} ×${b.count}` : b.ability
+            const tagProps = {
+              key: b.ability,
+              className: 'buff-tag',
+              style: { borderColor: color, color },
+            }
+            return spellId
+              ? <a {...tagProps} href={`https://tbc.wowhead.com/spell=${spellId}`} target="_blank" rel="noreferrer">{label}</a>
+              : <span {...tagProps}>{label}</span>
           })}
         </div>
       )}
@@ -240,6 +269,10 @@ export default function App() {
     if (players.length === 0) { setResults(null); return }
     optimiseDebounce.current = setTimeout(optimise, 300)
   }, [players]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (results) window.$WowheadPower?.refreshLinks()
+  }, [results])
 
   useEffect(() => {
     fetch(`${API}/meta`)
@@ -319,6 +352,12 @@ export default function App() {
     return result
   }
 
+  function getRandomInt(min, max) {
+    const minCeiled = Math.ceil(min);
+    const maxFloored = Math.floor(max);
+    return Math.floor(Math.random() * (maxFloored - minCeiled + 1) + minCeiled)
+  }
+
   function fillRoster() {
     const allSpecs = meta.classes.flatMap(c =>
       c.specs.map(s => ({ class_name: c.class_name, spec: s.spec }))
@@ -327,7 +366,7 @@ export default function App() {
     const tanks   = allSpecs.filter(s => TANK_KEYS.has(key(s)))
     const healers  = allSpecs.filter(s => HEALER_KEYS.has(key(s)))
 
-    const healerCount = raidSize === 10 ? 2 : 5
+    const healerCount = raidSize === 10 ? 2 : getRandomInt(4, 5) // 2 Healers in 10-man raids, 4 to 5 in 25.
     const pool = [
       ...weightedPickN(tanks, 2),
       ...weightedPickN(healers, healerCount),
@@ -655,6 +694,15 @@ export default function App() {
                 )}
                 <span className="dim drag-hint">Drag players between groups to adjust manually.</span>
               </div>
+              <p className="dim hint" style={{ margin: '0 0 10px', padding: '0 14px' }}>
+                The score reflects within-party buff synergy; the score is calculated based on how much each group member benefits from
+                the active buffs their party provide. The tool is primarily intended to help with the initial grouping and to provide 
+                insight into the synergy between different classes. Group optimisation is based on the highest total cumulitative score, 
+                some raid compositions may benefit from moving buff-providing classes from weaker groups to strenghten others. Tertiary 
+                factors such as gear or individual skill are not accounted for, these groupings may therefore not fully reflect optimal 
+                group compositions. Manual changes to the groups may be necessary to account for factors not considered by the score, or 
+                simply to accommodate personal preferences and social factors.
+              </p>
 
               <DndContext
                 sensors={sensors}
@@ -669,7 +717,17 @@ export default function App() {
                     const mean = nonEmpty.length > 0
                       ? nonEmpty.reduce((s, g) => s + g.score, 0) / nonEmpty.length
                       : 0
-                    const threshold = mean * 0.8
+                    const threshold = mean * 0.8 // treshold = less than 80% of the mean
+                    const isSynergistWithHealers = p => // add this check to not mark designated healer groups as bad synergy despite low score if they have a strong synergistic buff available.
+                      `${p.class_name}/${p.spec}` === 'Priest/Shadow' ||
+                      `${p.class_name}/${p.spec}` === 'Druid/Balance' ||
+                      `${p.class_name}/${p.spec}` === 'Shaman/Elemental' ||
+                      `${p.class_name}/${p.spec}` === 'Shaman/Enhancement'
+                    const isHealerGroup = g => {
+                      const healerCount = g.players.filter(p => ROLE_MAP[`${p.class_name}/${p.spec}`] === 'Healer').length
+                      return healerCount === 5 ||
+                        (healerCount === 4 && g.players.some(isSynergistWithHealers))
+                    }
                     return results.groups
                       .filter(g => g.players.length > 0 || nonEmpty.length > 0)
                       .map((group, i) => (
@@ -678,10 +736,12 @@ export default function App() {
                           index={i + 1}
                           group={group}
                           isOver={overId === `group-${i}`}
-                          isLeftover={
+                          isLeftover={ // all logic for marking a group as low synergy; very low score compared to the mean (and in general) and not a designated healer group
                             group.players.length > 0 &&
                             nonEmpty.length >= 3 &&
-                            group.score < threshold
+                            group.score < threshold &&
+                            group.score < 30 &&
+                            !isHealerGroup(group)
                           }
                         />
                       ))

@@ -1,27 +1,27 @@
 class,spec,role,benefits_from,notes
-Warrior,Arms,MeleeDPS,"Melee:0.9,MeleeSwing,Universal",Slightly weaker class overall
-Warrior,Fury,MeleeDPS,"Melee,MeleeSwing,Universal",
-Warrior,Protection,Tank,"Defensive,MeleeSwing:0.6,Melee:0.6,Universal",
-Paladin,Holy,Healer,"Caster:0.6,Mana,Universal",Spell power helps healing but mana is primary concern
-Paladin,Protection,Tank,"Defensive,MeleeSwing:0.6,Mana:0.8,Universal,Melee:0.6,Caster:0.6",Mana for threat generation; AP less valuable
-Paladin,Retribution,MeleeDPS,"Melee,MeleeSwing,Mana:0.2,Universal,Caster:0.1",
-Hunter,Beast Mastery,RangedDPS,"Ranged,Mana:0.6,Universal",
-Hunter,Marksmanship,RangedDPS,"Ranged:0.9,Mana:0.6,Universal",Slightly weaker class overall
-Hunter,Survival,RangedDPS,"Ranged:0.75,Melee:0.25,MeleeSwing:0.25,Mana:0.6,Universal",
-Rogue,Any,MeleeDPS,"Melee,MeleeSwing,Universal",No mana resource
-Priest,Discipline,Healer,"Caster:0.6,Mana,Universal",
-Priest,Holy,Healer,"Caster:0.6,Mana,Universal",
-Priest,Shadow,CasterDPS,"Caster:0.8,Mana:0.8,Universal",
-Shaman,Elemental,CasterDPS,"Caster,Mana,Universal",
-Shaman,Enhancement,MeleeDPS,"Melee,MeleeSwing,Mana:0.4,Universal,Caster:0.4",
-Shaman,Restoration,Healer,"Caster:0.6,Mana,Universal",Placed in melee groups for Windfury provision
-Mage,Arcane,CasterDPS,"Caster,Mana:1.2,Universal",
-Mage,Fire,CasterDPS,"Caster:0.9,Mana,Universal",Slightly weaker class overall
-Mage,Frost,CasterDPS,"Caster:0.9,Mana,Universal",Slightly weaker class overall
-Warlock,Affliction,CasterDPS,"Caster:0.8,Mana,Universal",Slightly weaker class overall
-Warlock,Demonology,CasterDPS,"Caster:0.7,Mana,Universal",Weaker class overall
-Warlock,Destruction,CasterDPS,"Caster,Mana,Universal",
-Druid,Balance,CasterDPS,"Caster,Mana,Universal",
-Druid,Feral (Cat),MeleeDPS,"Melee,Universal,Mana:0.4",
-Druid,Feral (Bear),Tank,"Defensive,Melee:0.6,Universal",Not a meaningful auto-attacker; no Windfury benefit
-Druid,Restoration,Healer,"Caster:0.6,Mana,Universal",
+Warrior,Arms,MeleeDPS,"AttackPower:0.9,Strength,PhysicalCrit:0.9,Agility:0.5,MeleeSwing:0.9,Damage:0.8",
+Warrior,Fury,MeleeDPS,"AttackPower,Strength,PhysicalCrit,Agility:0.5,MeleeSwing,Damage:0.8",
+Warrior,Protection,Tank,"AttackPower:0.5,Strength:0.5,PhysicalCrit:0.3,MeleeSwing:0.4,Agility:0.2",
+Paladin,Holy,Healer,"SpellPower,SpellCrit:0.4,Mana",
+Paladin,Protection,Tank,"Mana:0.7,SpellPower:0.3,Strength:0.4,AttackPower:0.4,PhysicalCrit:0.2,MeleeSwing:0.2",
+Paladin,Retribution,MeleeDPS,"AttackPower:0.9,Strength,PhysicalCrit:0.9,Agility:0.5,MeleeSwing,Mana:0.3,Damage:0.8",
+Hunter,Beast Mastery,RangedDPS,"Agility,AttackPower:0.9,PhysicalCrit:0.9,Mana:0.6,Damage:0.9",
+Hunter,Marksmanship,RangedDPS,"Agility,AttackPower:0.9,PhysicalCrit:0.9,Mana:0.6,Damage:0.8",
+Hunter,Survival,RangedDPS,"Agility,AttackPower:0.9,PhysicalCrit:0.9,Mana:0.6,Damage:0.8",
+Rogue,Any,MeleeDPS,"AttackPower,Agility,Strength:0.5,PhysicalCrit,MeleeSwing,Damage:0.9",
+Priest,Discipline,Healer,"SpellPower,SpellCrit:0.3,Mana",
+Priest,Holy,Healer,"SpellPower,SpellCrit:0.3,Mana",
+Priest,Shadow,CasterDPS,"SpellPower,SpellHit,SpellCrit:0.5,Mana:0.6,Damage:0.7",
+Shaman,Elemental,CasterDPS,"SpellPower,SpellCrit,SpellHit:0.9,Mana:0.8,Damage:0.7",
+Shaman,Enhancement,MeleeDPS,"AttackPower,Strength,PhysicalCrit:0.9,Agility:0.6,MeleeSwing,Mana:0.3,Damage:0.7,SpellPower:0.2",
+Shaman,Restoration,Healer,"SpellPower,SpellCrit:0.3,Mana",
+Mage,Arcane,CasterDPS,"SpellPower,SpellCrit,SpellHit,Mana,Damage:0.8",
+Mage,Fire,CasterDPS,"SpellPower,SpellCrit,SpellHit,Mana:0.7,Damage:0.8",
+Mage,Frost,CasterDPS,"SpellPower,SpellCrit:0.8,SpellHit,Mana:0.7,Damage:0.8",
+Warlock,Affliction,CasterDPS,"SpellPower,SpellHit:0.9,SpellCrit:0.3,Mana:0.5,Damage:0.7",
+Warlock,Demonology,CasterDPS,"SpellPower,SpellHit:0.9,SpellCrit:0.4,Mana:0.5,Damage:0.8",
+Warlock,Destruction,CasterDPS,"SpellPower,SpellCrit:0.9,SpellHit:0.9,Mana:0.5,Damage:0.8",
+Druid,Balance,CasterDPS,"SpellPower,SpellCrit,SpellHit:0.9,Mana:0.8,Damage:0.8",
+Druid,Feral (Cat),MeleeDPS,"AttackPower,Strength,Agility:0.9,PhysicalCrit,Damage:0.8,Mana:0.7",
+Druid,Feral (Bear),Tank,"AttackPower:0.5,Strength:0.5,PhysicalCrit:0.3,Agility:0.3",
+Druid,Restoration,Healer,"SpellPower,SpellCrit:0.3,Mana",

@@ -93,11 +93,13 @@ def score_group(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> f
 
 
 def get_active_buffs(group: list[Player], specs_lookup: dict, buffs: list[Buff]) -> list[dict]:
-    """Party buffs active in this group, with provider class and stack count."""
-    chosen, _ = _chosen_buffs(group, specs_lookup, buffs)
+    """Party buffs active in this group that at least one member benefits from."""
+    chosen, group_benefits = _chosen_buffs(group, specs_lookup, buffs)
     result: list[dict] = []
     index: dict[str, int] = {}
     for b, _ in chosen:
+        if _realised(b, group_benefits) == 0:
+            continue
         if b.ability in index:
             result[index[b.ability]]["count"] += 1
         else:

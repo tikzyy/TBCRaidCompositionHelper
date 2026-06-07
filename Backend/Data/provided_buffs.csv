@@ -1,28 +1,15 @@
 class,spec,ability,category,scope,exclusive_group,weight,stack_decay,notes
-Shaman,Any,Windfury Totem,MeleeSwing,party,air,5,,Extra melee swings; melee-group cornerstone; competes for air slot
-Shaman,Any,Wrath of Air Totem,Caster,party,air,4,,Spell power; competes for air slot
-Shaman,Any,Grace of Air Totem,"Melee,Ranged",party,air,3,,Agility; competes for air slot
-Shaman,Enhancement,Grace of Air Totem,"Melee,Ranged",party,air_twist,3,,Twisted with Windfury; Enhancement only
-Shaman,Enhancement,Wrath of Air Totem,Caster,party,air_twist,4,,Twisted with Windfury; Enhancement only; wins if casters outnumber melee
-Shaman,Elemental,Totem of Wrath,Caster,party,fire,5,0.66,Spell hit & crit; stacks across multiple Elemental Shamans at 50% decay
-Shaman,Restoration,Mana Tide Totem,Mana,party,water,1,,Cooldown; large party mana restore; talent; temporarily overrides water totem
-Paladin,Any,Devotion Aura,Defensive,raid,aura,0,,Armor; raid-wide in TBC; only one aura active at a time
-Paladin,Any,Retribution Aura,Melee,raid,aura,0,,Holy damage to attackers; raid-wide in TBC; aura slot
-Paladin,Any,Concentration Aura,Caster,raid,aura,0,,Reduces casting pushback; raid-wide in TBC; aura slot
-Paladin,Any,Greater Blessing of Might,"Melee,Ranged",raid,blessing,0,,Per-class raid-wide AP; not group-positional
-Paladin,Any,Greater Blessing of Wisdom,Mana,raid,blessing,0,,Per-class raid-wide mp5
-Paladin,Any,Greater Blessing of Kings,Universal,raid,blessing,0,,Per-class raid-wide +10% stats; talent
-Paladin,Any,Greater Blessing of Sanctuary,Universal,raid,blessing,0,,
-Paladin,Any,Greater Blessing of Light,Universal,raid,blessing,0,,
-Paladin,Any,Greater Blessing of Salvation,Defensive,raid,blessing,0,,Per-class raid-wide threat reduction
-Hunter,Marksmanship,Trueshot Aura,"Melee,Ranged",party,,3,0,AP buff; party-wide
-Hunter,Beast Mastery,Ferocious Inspiration,Universal,party,,2,0.25,+3% party damage when pet crits; talent
-Warrior,Any,Battle Shout,"Melee,Ranged",party,shout,2,0,AP; party-wide
-Warrior,Any,Commanding Shout,Defensive,party,shout,0,,Max health; party-wide
-Priest,Any,Prayer of Fortitude,Universal,raid,,5,,Stamina; raid-wide
-Priest,Discipline,Prayer of Spirit,Mana,raid,,5,,Spirit; talent; raid-wide
-Priest,Shadow,Vampiric Touch,Mana,party,,3,,Returns mana to party from shadow damage; caster-group cornerstone
-Mage,Any,Arcane Brilliance,Mana,raid,,5,,Intellect (mana pool + spell crit); raid-wide
-Druid,Feral,Leader of the Pack,"Melee,Ranged",party,,4,0,5% party crit; matches Feral (Cat) and Feral (Bear)
-Druid,Any,Mark of the Wild (Improved),Universal,raid,,5,,Stats & resistances; cast on all (raid-wide)
-Druid,Balance,Moonkin Aura,Caster,party,,5,0,5% spell crit; mana return on hit (scaling on ap)
+Shaman,Any,Windfury Totem,MeleeSwing,party,air,5,,"The totem enchants all party members main-hand weapons with wind, if they are within 20 yards. Each hit has a 20% chance of granting the attacker 1 extra attack with extra melee attack power."
+Shaman,Any,Wrath of Air Totem,SpellPower,party,air,4,,The totem increases spell damage and heal power of party members within 20 yards.
+Shaman,Any,Strength of Earth Totem,Strength,party,earth,3,,The totem increases the strength of party members within 20 yards.
+Shaman,Any,Grace of Air Totem,Agility,party,air,3,,The totem increases the agility of party members within 20 yards.
+Shaman,Enhancement,Grace of Air Totem,Agility,party,air_twist,3,,The totem increases the agility of party members within 20 yards.
+Shaman,Enhancement,Wrath of Air Totem,SpellPower,party,air_twist,4,,The totem increases spell damage and heal power of party members within 20 yards.
+Shaman,Elemental,Totem of Wrath,"SpellCrit,SpellHit",party,fire,5,0.66,Chance to critically strike with spells increased by 3% and chance to hit with spells increased by 3%.
+Shaman,Restoration,Mana Tide Totem,Mana,party,water,1,,Restores 6% of total mana every 3 seconds for 12 seconds to group members within 20 yards.
+Hunter,Marksmanship,Trueshot Aura,AttackPower,party,,3,0,Increases the attack power of party members within 45 yards.
+Hunter,Beast Mastery,Ferocious Inspiration,Damage,party,,2,0.25,"When your pet scores a critical hit, all party members have all damage increased by 3% for 10 sec."
+Warrior,Any,Battle Shout,AttackPower,party,shout,2,0,"The warrior shouts, increasing the melee attack power of all party members within 20 yards."
+Priest,Shadow,Vampiric Touch,Mana,party,,3,,Causes all party members to gain mana equal to 5% of any Shadow spell damage the shadow priest deal.
+Druid,Feral,Leader of the Pack,PhysicalCrit,party,,4,0,Increases ranged and melee critical chance of all party members within 45 yards by 5%.
+Druid,Balance,Moonkin Aura,SpellCrit,party,,5,0,Increases spell critical chance by 5%.

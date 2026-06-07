@@ -435,4 +435,9 @@ button, select { cursor: pointer; font: inherit; }
   border-radius: 20px;
   padding: 2px 8px;
   color: var(--dim);
+  text-decoration: none;
+  cursor: default;
+}
+a.buff-tag {
+  cursor: pointer;
 }
