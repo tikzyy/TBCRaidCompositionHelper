@@ -68,9 +68,6 @@ Return to the project root when done:
 cd ..
 ```
 
-> You will need to re-activate the virtual environment (the `activate` step above)
-> whenever you open a new terminal.
-
 ### 3. Node dependencies
 
 Install the root-level launcher package:
