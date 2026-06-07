@@ -211,7 +211,9 @@ function DroppableGroupCard({ index, group, isOver, isLeftover }) {
           .sort((a, b) => {
             const ra = ROLE_ORDER[ROLE_MAP[`${a.class_name}/${a.spec}`] ?? 'Ranged'] ?? 2
             const rb = ROLE_ORDER[ROLE_MAP[`${b.class_name}/${b.spec}`] ?? 'Ranged'] ?? 2
-            return ra !== rb ? ra - rb : a.class_name.localeCompare(b.class_name)
+            if (ra !== rb) return ra - rb
+            if (a.class_name !== b.class_name) return a.class_name.localeCompare(b.class_name)
+            return a.spec.localeCompare(b.spec)
           })
           .map(p => (
             <DraggablePlayer key={p.id} player={p} groupIdx={index - 1} />
