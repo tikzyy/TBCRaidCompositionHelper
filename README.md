@@ -24,10 +24,17 @@ node --version
 
 ## Setup
 
-All commands below are run from the `TBCRaidCompositionHelper/` folder (the project root)
+All commands after coling the repository are run from the `TBCRaidCompositionHelper/` folder (the project root)
 unless a different directory is specified.
 
-### 1. Python backend
+### 1. Clone the repository
+
+```
+git clone https://github.com/tikzyy/TBCRaidCompositionHelper.git
+cd TBCRaidCompositionHelper
+```
+
+### 2. Python backend
 
 From the project root, navigate into `Backend/` and create a virtual environment:
 
@@ -64,7 +71,7 @@ cd ..
 > You will need to re-activate the virtual environment (the `activate` step above)
 > whenever you open a new terminal.
 
-### 2. Node dependencies
+### 3. Node dependencies
 
 Install the root-level launcher package:
 
@@ -102,7 +109,7 @@ both servers.
 ## Using the app
 
 1. **Select a raid size** - 10-man (2 groups of 5) or 25-man (5 groups of 5).
-2. **Add players** —-use the class and spec dropdowns to add each member of your roster.
+2. **Add players** - use the class and spec dropdowns to add each member of your roster.
    Double-click a player's name label at any time to rename them.
 3. **Group Together (optional)** - open the Group Together tab to mark sets of players
    who must be placed in the same group. Assign each player a letter (A, B, C…); players
