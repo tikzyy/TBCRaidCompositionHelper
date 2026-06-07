@@ -69,7 +69,9 @@ def _chosen_buffs(
 
         selected = list(non_exclusive)
         for slot_buffs in exclusive.values():
-            best = max(slot_buffs, key=lambda b: _realised(b, group_benefits))
+            unclaimed = [b for b in slot_buffs if ability_count.get(b.ability, 0) == 0 or b.stack_decay > 0]
+            candidates = unclaimed if unclaimed else slot_buffs
+            best = max(candidates, key=lambda b: _realised(b, group_benefits))
             selected.append(best)
 
         for buff in selected:

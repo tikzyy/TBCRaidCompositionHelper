@@ -697,7 +697,7 @@ export default function App() {
                 <span className="dim drag-hint">Drag players between groups to adjust manually.</span>
               </div>
               <p className="dim hint" style={{ margin: '0 0 10px', padding: '0 14px' }}>
-                The score reflects within-party buff synergy; the score is calculated based on how much each group member benefits from
+                The score reflects cumulative within-party buff synergy; the score is calculated based on how much each group member benefits from
                 the active buffs their party provide. The tool is primarily intended to help with the initial grouping and to provide 
                 insight into the synergy between different classes. Group optimisation is based on the highest total cumulitative score, 
                 some raid compositions may benefit from moving buff-providing classes from weaker groups to strenghten others. Tertiary 

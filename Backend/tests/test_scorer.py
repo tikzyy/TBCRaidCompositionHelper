@@ -33,7 +33,8 @@ def test_air_slot_picks_windfury_for_melee_group():
     Group: 1 Enhancement Shaman + 3 Fury Warriors.
 
     Enhancement Shaman air slot candidates (all Shaman Any rows):
-      Windfury      (MeleeSwing, w=5)  → 5 * (1.0+1.0+1.0+1.0) = 20.0  ← best
+      Windfury      (MeleeSwing, w=5)  → 5 * (0+1.0+1.0+1.0)   = 15.0  ← best
+        (Enhancement Shaman has no MeleeSwing benefit)
       Wrath of Air  (SpellPower, w=4)  → 4 * 0                  =  0.0
       Grace of Air  (Agility,    w=3)  → 3 * (0.6+0.5+0.5+0.5)  =  6.3
 
@@ -48,7 +49,7 @@ def test_air_slot_picks_windfury_for_melee_group():
     deduplicated to one instance:
       Battle Shout → 2 * (1.0+1.0+1.0+1.0) = 8.0
 
-    Total = 20.0 + 6.3 + 12.0 + 8.0 = 46.3
+    Total = 15.0 + 6.3 + 12.0 + 8.0 = 41.3
     """
     group = [
         p("s1", "Shaman", "Enhancement"),
@@ -56,7 +57,7 @@ def test_air_slot_picks_windfury_for_melee_group():
         p("w2", "Warrior", "Fury"),
         p("w3", "Warrior", "Fury"),
     ]
-    assert score_group(group, SPECS, BUFFS) == pytest.approx(46.3, abs=1e-6)
+    assert score_group(group, SPECS, BUFFS) == pytest.approx(41.3, abs=1e-6)
 
 
 # ---------------------------------------------------------------------------

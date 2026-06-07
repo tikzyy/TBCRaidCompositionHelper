@@ -7,13 +7,13 @@ Paladin,Protection,Tank,"Mana:0.7,SpellPower:0.3,Strength:0.4,AttackPower:0.4,Ph
 Paladin,Retribution,MeleeDPS,"AttackPower:0.9,Strength,PhysicalCrit:0.9,Agility:0.5,MeleeSwing,Mana:0.3,Damage:0.8",
 Hunter,Beast Mastery,RangedDPS,"Agility,AttackPower:0.9,PhysicalCrit:0.9,Mana:0.6,Damage:0.9",
 Hunter,Marksmanship,RangedDPS,"Agility,AttackPower:0.9,PhysicalCrit:0.9,Mana:0.6,Damage:0.8",
-Hunter,Survival,RangedDPS,"Agility,AttackPower:0.9,PhysicalCrit:0.9,Mana:0.6,Damage:0.8",
+Hunter,Survival,RangedDPS,"Agility,MeleeSwing:0.4,AttackPower:0.9,PhysicalCrit:0.9,Mana:0.6,Damage:0.8",Mixed melee and ranged
 Rogue,Any,MeleeDPS,"AttackPower,Agility,Strength:0.5,PhysicalCrit,MeleeSwing,Damage:0.9",
 Priest,Discipline,Healer,"SpellPower,SpellCrit:0.3,Mana",
 Priest,Holy,Healer,"SpellPower,SpellCrit:0.3,Mana",
 Priest,Shadow,CasterDPS,"SpellPower,SpellHit,SpellCrit:0.5,Mana:0.6,Damage:0.7",
 Shaman,Elemental,CasterDPS,"SpellPower,SpellCrit,SpellHit:0.9,Mana:0.8,Damage:0.7",
-Shaman,Enhancement,MeleeDPS,"AttackPower,Strength,PhysicalCrit:0.9,Agility:0.6,MeleeSwing,Mana:0.3,Damage:0.7,SpellPower:0.2",
+Shaman,Enhancement,MeleeDPS,"AttackPower,Strength,PhysicalCrit:0.9,Agility:0.6,Mana:0.3,Damage:0.7,SpellPower:0.4, SpellCrit:0.4","Melee caster - primarily melee and scales on attack power, but also casts spells that can benefit from spellpower"
 Shaman,Restoration,Healer,"SpellPower,SpellCrit:0.3,Mana",
 Mage,Arcane,CasterDPS,"SpellPower,SpellCrit,SpellHit,Mana,Damage:0.8",
 Mage,Fire,CasterDPS,"SpellPower,SpellCrit,SpellHit,Mana:0.7,Damage:0.8",
