@@ -24,7 +24,7 @@ node --version
 
 ## Setup
 
-All commands after coling the repository are run from the `TBCRaidCompositionHelper/` folder (the project root)
+All commands after cloning the repository are run from the `TBCRaidCompositionHelper/` folder (the project root)
 unless a different directory is specified.
 
 ### 1. Clone the repository
