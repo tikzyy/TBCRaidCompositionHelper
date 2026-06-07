@@ -226,7 +226,7 @@ function DroppableGroupCard({ index, group, isOver, isLeftover }) {
       </ul>
       {group.active_buffs.length > 0 && (
         <div className="buff-list">
-          {group.active_buffs.map(b => {
+          {[...group.active_buffs].sort((a, b) => a.ability.length - b.ability.length).map(b => {
             const color = CLASS_COLORS[b.class_name] ?? 'var(--dim)'
             const spellId = BUFF_SPELL_IDS[b.ability]
             const label = b.count > 1 ? `${b.ability} ×${b.count}` : b.ability
